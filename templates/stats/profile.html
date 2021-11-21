@@ -1,0 +1,302 @@
+{% extends 'server/base.html' %}
+{% load static %}
+{% load timestamp_to_time %}
+{% load seconds_convert %}
+
+
+{% block content %}
+<div class="d-flex flex-column" style="overflow-x: hidden;">
+  <div style="background-image: url({% static 'server/images/profile.jpg' %});transition:200ms;" class="hero">
+    <div class="hero-overlay">
+      <div class="d-flex flex-column" style="margin:40px;color:white">
+        <img src="{{profile.avatar}}" class="img-fluid m-auto" width="80px" height="80px" style="border-radius: 50%;"
+          alt="Profile">
+        <h5 class="m-auto" id="hero_heading" style="font-weight: 600;">{{ profile.nickname}}</h5>
+
+      </div>
+    </div>
+  </div>
+  <div class="py-4 " style="cursor: default;">
+    <div class="d-flex justify-content-evenly text-center text-muted">
+      <div>
+        <h5>RETAKES</h5>
+        <h3 class="text-primary">#{{ retake.get_rank |default:"0"}}</h3>
+      </div>
+      <div>
+        <h5>PUG</h5>
+        <h3 class="text-primary">#{{ retake.get_rank |default:"0"}}</h3>
+      </div>
+      <div>
+        <h5>ARENA</h5>
+        <h3 class="text-primary">#{{ retake.get_rank |default:"0"}}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid bg-light">
+    <div class="mt-3 p-1">
+      <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+          <button class="nav-link active" id="nav-retake-tab" data-bs-toggle="tab" data-bs-target="#nav-retake"
+            type="button" role="tab" aria-controls="nav-retake" aria-selected="true">Retakes</button>
+          <button class="nav-link" id="nav-1v1-tab" data-bs-toggle="tab" data-bs-target="#nav-1v1" type="button"
+            role="tab" aria-controls="nav-1v1" aria-selected="false">Arena 1v1</button>
+          <button class="nav-link" id="nav-pug-tab" data-bs-toggle="tab" data-bs-target="#nav-pug" type="button"
+            role="tab" aria-controls="nav-pug" aria-selected="false">PUG</button>
+            <span class="mx-5"></span>
+          <button class="nav-link" id="nav-bans-tab" data-bs-toggle="tab" data-bs-target="#nav-bans" type="button"
+            role="tab" aria-controls="nav-bans" aria-selected="false">Ban history</button>
+          <button class="nav-link" id="nav-comms-tab" data-bs-toggle="tab" data-bs-target="#nav-comms" type="button"
+            role="tab" aria-controls="nav-comms" aria-selected="false">Comms history</button>
+        </div>
+      </nav>
+      <div class="tab-content bg-white" id="nav-tabContent">
+        <!-- Retake -->
+        <div class="tab-pane fade show active p-4" id="nav-retake" role="tabpanel" aria-labelledby="nav-retake-tab">
+          <div class="row fs-1 text-muted text-center p-1">
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-poll"></i>
+                <p>#{{retake.get_rank|default:"0"}} <span class="fs-6">Rank</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-book-dead"></i>
+                <p>{{retake.kills|default:"0"}} <span class="fs-6">Kills</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-skull"></i>
+                <p>{{retake.deaths|default:"0"}} <span class="fs-6">Deaths</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-handshake"></i>
+                <p>{{retake.assists|default:"0"}} <span class="fs-6">Assists</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-bullseye"></i>
+                <p>{{retake.get_kd|default:"0"}} <span class="fs-6">K/D</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-crosshairs"></i>
+                <p>{{retake.headshots|default:"0"}} <span class="fs-6">Headshots</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-times"></i>
+                <p>{{retake.get_accuracy |default:"0"}}% <span class="fs-6">Hit accuracy</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-coins"></i>
+                <p>{{retake.value|default:"0"}} <span class="fs-6">Score</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1 v 1 -->
+        <div class="tab-pane fade p-4" id="nav-1v1" role="tabpanel" aria-labelledby="nav-1v1-tab">
+          <div class="row fs-1 text-muted text-center p-1">
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-poll"></i>
+                <p>#{{arena.get_rank|default:"0"}} <span class="fs-6">Rank</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-book-dead"></i>
+                <p>{{arena.kills|default:"0"}} <span class="fs-6">Kills</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-skull"></i>
+                <p>{{arena.deaths|default:"0"}} <span class="fs-6">Deaths</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-handshake"></i>
+                <p>{{arena.assists|default:"0"}} <span class="fs-6">Assists</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-bullseye"></i>
+                <p>{{arena.get_kd|default:"0"}} <span class="fs-6">K/D</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-crosshairs"></i>
+                <p>{{arena.headshots|default:"0"}} <span class="fs-6">Headshots</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-times"></i>
+                <p>{{arena.get_accuracy |default:"0"}}% <span class="fs-6">Hit accuracy</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-coins"></i>
+                <p>{{arena.value|default:"0"}} <span class="fs-6">Score</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PUG -->
+        <div class="tab-pane fade p-4" id="nav-pug" role="tabpanel" aria-labelledby="nav-pug-tab">
+          <div class="row fs-1 text-muted text-center p-1">
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-poll"></i>
+                <p>#{{pug.get_rank|default:"0"}} <span class="fs-6">Rank</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-book-dead"></i>
+                <p>{{pug.kills|default:"0"}} <span class="fs-6">Kills</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-skull"></i>
+                <p>{{pug.deaths|default:"0"}} <span class="fs-6">Deaths</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-handshake"></i>
+                <p>{{pug.assists|default:"0"}} <span class="fs-6">Assists</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-bullseye"></i>
+                <p>{{pug.get_kd|default:"0"}} <span class="fs-6">K/D</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-crosshairs"></i>
+                <p>{{pug.headshots|default:"0"}} <span class="fs-6">Headshots</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-times"></i>
+                <p>{{pug.get_accuracy |default:"0"}}% <span class="fs-6">Hit accuracy</span></p>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 p-2">
+              <div class="d-flex flex-column">
+                <i class="fas fa-coins"></i>
+                <p>{{pug.value|default:"0"}} <span class="fs-6">Score</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bans -->
+        <div class="tab-pane fade p-4" id="nav-bans" role="tabpanel" aria-labelledby="nav-bans-tab">
+          <table class="table">
+            <thead>
+              <tr class="bg-dark text-white">
+                <th scope="col">NAME</th>
+                <th class="d-none d-md-table-cell" scope="col">REASON</th>
+                <th scope="col">EXPIRED/ EXPIRES ON</th>
+                <th class="d-none d-md-table-cell" scope="col">LENGTH</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for ban in bans %}
+              <tr>
+                <td>
+                  {{ban.name}}
+                </td>
+                <td class="d-none d-md-table-cell">{{ban.reason}}</td>
+                <td>
+                  <span class="badge rounded-pill bg-secondary">
+                    {{ban.ends|timestamp_to_time|date:"d M Y"}}
+
+                  </span>
+
+                </td>
+                <td class="d-none d-md-table-cell">
+                  <span class="badge rounded-pill bg-primary">
+                    {{ban.length|seconds_convert}}
+
+                  </span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-success text-center">All empty</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Comms -->
+        <div class="tab-pane fade p-4" id="nav-comms" role="tabpanel" aria-labelledby="nav-comms-tab">
+          <table class="table">
+            <thead>
+              <tr class="bg-dark text-white">
+                <th scope="col">NAME</th>
+                <th class="d-none d-md-table-cell" scope="col">REASON</th>
+                <th scope="col">EXPIRED/ EXPIRES ON</th>
+                <th class="d-none d-md-table-cell" scope="col">LENGTH</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for ban in comms %}
+              <tr>
+                <td>
+                  {{ban.name}}
+                </td>
+                <td class="d-none d-md-table-cell">{{ban.reason}}</td>
+                <td>
+                  <span class="badge rounded-pill bg-secondary">
+                    {{ban.ends|timestamp_to_time|date:"d M Y"}}
+
+                  </span>
+
+                </td>
+                <td class="d-none d-md-table-cell">
+                  <span class="badge rounded-pill bg-primary">
+                    {{ban.length|seconds_convert}}
+
+                  </span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-success text-center">All empty</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+
+      </div>
+    </div>
+
+    {% endblock content %}

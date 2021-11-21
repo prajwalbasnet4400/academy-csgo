@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+
+
+{% block content %}
+<div class="container-fluid" style="padding-top:80px;font-family: 'Open Sans';">
+    <div class="row">
+        {% for vip in vip_list %}
+        <div class="col-6 col-md-3">
+            <div class="vip-card">
+                <div class="curve">
+                    <h3>
+                        {{ vip }}
+                    </h3>
+                </div>
+                <div class="vip-card-body">
+                    <p>
+                        Purchased : {{vip.dateofpurchase}} <br>
+                        Expires : {{vip.expires}} <br>
+                        Server : {{vip.server}} <br>
+                        Expires in : {{vip.to_expire}}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% include 'footer.html' %}
+{% endblock content %}
+
+{% block js %}
+{% endblock js %}
