@@ -7,6 +7,16 @@ load_dotenv()
 
 def get_playerinfo(profile_url):
         api_key = os.environ.get('STEAM_API_KEY')
+        try:
+            player_info_url = f'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={api_key}&steamids={profile_url}'
+            r = requests.get(player_info_url,timeout=1)
+            response_json = r.json()
+            return response_json['response']['players'][0]
+
+        except:
+            pass
+
+
         steamid = profile_url.split('/')
         if steamid[-1] == '':
             to_resolve = steamid[-2]

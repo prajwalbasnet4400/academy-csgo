@@ -12,7 +12,9 @@
     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
     integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+    <script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
   <link rel="stylesheet" href="{% static 'server/css/server.css' %}">
+
   <title>Academy Gaming CSGO</title>
 </head>
 
@@ -47,7 +49,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" aria-current="page" href="">
+          <a class="nav-link" aria-current="page" href="{% url 'store:index' %}">
             <span class="round-icon"><i class="fas fa-store"></i></span><span class="icon-text">Store</span>
           </a>
         </li>
@@ -84,6 +86,11 @@
             <span class="round-icon"><i class="fas fa-address-book"></i></span><span class="icon-text">Contact Us</span>
           </a>
         </li>
+        <li class="nav-item" style="display: none;">
+          <a class="nav-link" aria-current="page" href="/profile/">
+            <span class="round-icon"><i class="fas fa-address-book"></i></span><span class="icon-text">Contact Us</span>
+          </a>
+        </li>
       </ul>
     </div>
 
@@ -93,9 +100,8 @@
           <i class="fas fa-bars"></i>
         </button>
         {% if user.is_authenticated %}
-        <a class="btn btn-outline-light ms-auto me-3 login-button" href="#" style="position: absolute;right: 0;top: 0;margin-top: 25px;">
+        <a class="btn btn-outline-light ms-auto me-3 login-button" href="{% url 'stats:profile' user.get_steamid %}" style="position: absolute;right: 0;top: 0;margin-top: 25px;">
           <img style="border-radius: 25px;" src="{{user.social_auth.first.extra_data.player.avatarmedium}}" width="25px" alt="PP">
-          
           {{user}}
         </a>
         {% else %}
@@ -137,5 +143,7 @@
 
 
 </body>
+
+
 
 </html>

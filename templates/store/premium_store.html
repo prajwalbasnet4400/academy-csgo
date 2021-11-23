@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+<div class="container-fluid" style="padding-top:80px;font-family: 'Open Sans';">
+    <div class="row">
+        {% for server in servers %}
+        <div class="col">
+                <a href="{% url 'store:product' server.slug %}">{{server}}</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% include 'footer.html' %}
+{% endblock content %}

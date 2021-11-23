@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid" style="padding-top:80px;font-family: 'Open Sans';">
+    <!-- CHANGE THIS TO MUCH SECURE -->
+    {% csrf_token %}
+    {{product.title}}<br>
+    RS {{product.price}}<br>
+    DUration {{product.duration}}
+
+    <h5 id="steamid_name">{{profile.personaname}}</h5>
+        <img src="{{profile.avatarfull}}" width="128px" alt="pp"><br>
+    <button id="payment-button" class="btn btn-success">Pay with Khalti</button>
+</div>
+{% include 'footer.html' %}
+{% endblock content %}
+
+{% block js %}
+<script>
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    var config = {
+        "merchant_extra":"{{profile.steamid}}",
+        "publicKey": "test_public_key_58adebc2ceaa46c1be2c3a9c6509ea26",
+        "productIdentity": "{{product.slug}}",
+        "productName": "{{product.slug}}",
+        "productUrl": "http://{{request.get_host}}{{product.get_absolute_url}}",
+        "paymentPreference": [
+            "KHALTI",
+            "EBANKING",
+            "MOBILE_BANKING",
+            "CONNECT_IPS",
+            "SCT",
+            ],
+        "eventHandler": {
+            onSuccess (payload) {
+                var url = "{% url 'store:khalti_verification_url' %}";
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: payload,
+                    dataType: 'json',
+                    headers: { 'X-CSRFToken': csrftoken }
+                });
+            },
+            onError (error) {
+                console.log(error);
+            },
+            onClose () {
+                console.log('widget is closing');
+            }
+        }
+    };
+
+    var checkout = new KhaltiCheckout(config);
+    var btn = document.getElementById("payment-button");
+    btn.onclick = function () {
+        checkout.show({amount: 1000});
+    }
+</script>
+{% endblock js %}

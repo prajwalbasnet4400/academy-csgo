@@ -10,7 +10,7 @@
         <div class="col-12 col-md-6">
             <div class="mb-3">
 
-                <h1 style="font-family: 'Raleway';font-size: 2.3rem;">REPORT PLAYER</h1>
+                <h1 style="font-family: 'Raleway';font-size: 2.3rem;">{{reporttitle}}</h1>
                 <form action=" " method="post" class="custom-form ms-0 ms-md-3">
                     {% csrf_token %}
                     {{form|crispy }}

@@ -91,7 +91,7 @@ DATABASES = {
         'PASSWORD':os.environ.get('DB_RETAKE_PASS'),  
         'HOST':os.environ.get('DB_RETAKE_HOST'),  
         'PORT':os.environ.get('DB_RETAKE_PORT')
-    },'deathmatch':{
+    },'warmup':{
                 'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_ARENA_NAME'),  
         'USER':os.environ.get('DB_ARENA_USER'),  
@@ -145,3 +145,11 @@ SOCIAL_AUTH_AUTHENTICATION_BACKENDS = ('social_core.backends.steam.SteamOpenId',
 STEAM_WEB_API_KEY = os.environ.get('STEAM_API_KEY')
 SOCIAL_AUTH_STEAM_EXTRA_DATA = ['player']
 CRISPY_TEMPLATE_PACK = 'bootstrap4' 
+
+KHALTI_API_PUBLIC_KEY_TEST = os.environ.get('KHALTI_API_PUBLIC_KEY_TEST')
+KHALTI_API_SECRET_KEY_TEST = os.environ.get('KHALTI_API_SECRET_KEY_TEST')
+
+KHALTI_VERIFICATION_URL = 'https://khalti.com/api/v2/payment/verify/'
+KHALTI_LIST_URL = 'https://khalti.com/api/v2/merchant-transaction/'
+KHALTI_DETAIL_URL = 'https://khalti.com/api/v2/merchant-transaction/<idx>/'
+KHALTI_STATUS_URL = 'https://khalti.com/api/v2/payment/status/'

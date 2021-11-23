@@ -8,6 +8,7 @@
   --icon-bg-color : #31373f ;
   --icon-text-hover:#ffd900;
   --icon-text-active: #e2c000;
+  --theme-color:#fddc20;
   
 }
 
@@ -15,8 +16,8 @@ html{
     /* scrollbar-color: #d5f05e #000000; */
     scrollbar-width: thin;
 }
-/* ::-webkit-scrollbar {
-    width: 8px;
+::-webkit-scrollbar {
+    width: 5px;
   }
    
 ::-webkit-scrollbar-track {
@@ -26,7 +27,7 @@ box-shadow: inset 0 0 6px rgba(187, 194, 96, 0.3);
 ::-webkit-scrollbar-thumb {
 background-color: #6c757d;
 outline: 1px solid slategrey;
-} */
+}
 
 
 body{
@@ -168,7 +169,7 @@ body{
   color: var(--icon-bg-color);
 }
 .theme-btn:hover{
-  background-color: #fddc20;
+  background-color: var(--theme-color);
 }
 
 .footer{
@@ -180,14 +181,14 @@ body{
   background-color: #232a3156;
 }
 .footer h6{
-  color: #fddc20;
+  color: var(--theme-color);
   font-weight: bold;
 }
 .footer h5{
   font-weight: bold;
 }
 .theme-color{
-  color: #fddc20;
+  color: var(--theme-color);
 }
 .custom-form label{
   font-size: 0.95rem;
@@ -280,4 +281,58 @@ body{
   padding-top: 100px;
   padding-bottom: 20px;
   text-align: center;
+}
+
+.profile-header{
+  width: 100%;
+  height: 40vh;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 50% 50% cover;
+}
+.profile-header .overlay{
+  background: rgb(139, 140, 141);
+  background: linear-gradient(180deg, rgba(64,115,166,0) 0%, rgba(33,37,41,1) 89%); 
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+table.score-data{
+  text-align: center;
+  color: #cbcbcb;
+
+}
+table.score-data tr{
+  border: 1px solid #272c31;
+  border-left: none;
+  border-right: none;
+
+}
+table.score-data td{
+  padding: 0.7rem;
+}
+table.score-data h5{
+  font-weight: bold;
+}
+
+.name-tag{
+  font-size: .7rem;
+  vertical-align: top;
+  border-radius: 5px;
+  padding: 4px;
+  text-transform: uppercase;
+  background: rgba(139, 140, 141, 0.11);
+  border: var(--bs-primary) 1px solid;
+  color: var(--bs-primary);
+
+}
+
+.name-tag.premium{
+  border: var(--icon-active-color) 1px solid;
+  color: var(--theme-color);
+}
+.name-tag.staff{
+  color:#dc3545;
+  border: #dc3545 1px solid;
 }

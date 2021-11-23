@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 from steam.models import Profile
 from . import resolver
 from . import vip
@@ -8,16 +9,21 @@ class Server(models.Model):
     ip = models.CharField(max_length=32)
     port = models.CharField(max_length=32)
     hide = models.BooleanField(default=False)
-    display_name = models.CharField(max_length=64)
+    display_name = models.CharField(unique=True,max_length=128)
     ssh_ip = models.CharField(max_length=128,null=True,blank=True)
     ssh_port = models.IntegerField(null=True,blank=True)
     ssh_user = models.CharField(max_length=64,null=True,blank=True)
     ssh_psswd = models.CharField(max_length=64,null=True,blank=True)
     path_to_vip_file = models.CharField(max_length=512,null=True,blank=True)
-
+    selling_premium = models.BooleanField(default=True)
+    slug = models.SlugField(blank=True)
 
     def __str__(self):
         return f'{self.display_name}'
+
+    def save(self,*args, **kwargs):
+        self.slug = slugify(self.display_name)
+        super().save(*args, **kwargs)
 
 
 def get_expiry():
@@ -54,7 +60,7 @@ class Vip(models.Model):
             if query.active == self.active:
                 pass
             elif self.active == True:
-                pass
+                print('asudghaiushgdiouashgdiuh')
                 # vip.add_vip(self.steamid,self.server)
             else:
                 pass
@@ -89,9 +95,15 @@ class LvlBase(models.Model):
     def get_playtime(self):
         pt = self.playtime // 3600
         return pt
-
+    
     def get_rank(self):
         return LvlBase.objects.using('retake').values('value').filter(value__gte=self.value).count()
+    
+    def get_rank_retake(self):
+        return LvlBase.objects.using('retake').values('value').filter(value__gte=self.value).count()
+    
+    def get_rank_warmup(self):
+        return LvlBase.objects.using('warmup').values('value').filter(value__gte=self.value).count()
     
     def get_steamid64(self):
         x , y , z = self.steam.split(':')
