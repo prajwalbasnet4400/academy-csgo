@@ -43,7 +43,6 @@ class CheckoutView(DetailView):
     
 
 class KhaltiVerifyView(View):
-    key = settings.KHALTI_API_SECRET_KEY_TEST
     url = 'https://khalti.com/api/v2/payment/verify/'
 
     def post(self,request,*args, **kwargs):
