@@ -1,36 +1,36 @@
 from django.db import models
-from django.urls import reverse
 from django.utils.text import slugify
-from steam.models import User
+
 from stats.models import Server
 
 class Product(models.Model):
-    title = models.CharField(max_length=64,unique=True)
-    detail = models.CharField(max_length=64)
-    price = models.PositiveSmallIntegerField()
-    features = models.TextField(help_text='Displayed in a list, create newline to separate list')
-    notes = models.CharField(max_length=128, blank=True,help_text='Displayed highlighted at the end of features list')
-    icon = models.CharField(max_length=32,blank=True,null=True,help_text='Font awesome 5 class name like so "fas fa-hammer")')
-    image = models.ImageField(upload_to='uploads/',null=True,blank=True)
-    slug = models.SlugField(unique=True,blank=True)
-    server = models.ForeignKey(Server,on_delete=models.CASCADE,null=True)
+    title = models.CharField(max_length=64)
+    price = models.PositiveSmallIntegerField(help_text='Enter in paisa. ie Rs 10 is 1000')
+    server = models.ForeignKey(Server,on_delete=models.CASCADE,null=True,related_name='products')
     duration = models.PositiveSmallIntegerField()
+    slug = models.SlugField(unique=True,blank=True)
 
+    def __str__(self):
+        return self.title
 
     def save(self,*args, **kwargs):
         slug = f"{self.server.slug}-{self.duration}D"
         self.slug = slugify(slug)
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.title
-
-    def get_absolute_url(self):
-        return reverse("store:checkout", kwargs={"slug": self.slug})
+    
+    def in_stock(self):
+        return self.server.product_in_stock()
+    
+    def f_price(self):
+        return self.price // 100
 
 class Purchase(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    buyer = models.CharField(max_length=54,null=True)
+    receiver = models.CharField(max_length=54,null=True)
     idx = models.CharField(max_length=128)
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
-    mobile = models.CharField(max_length=13)
-    token = models.CharField(max_length=128)
+    date_created = models.DateTimeField(auto_now_add=True)
+    complete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.idx

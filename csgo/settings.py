@@ -1,4 +1,5 @@
 from pathlib import Path
+from django.core.checks.messages import DEBUG
 import dotenv
 import os
 
@@ -9,8 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(os.environ.get('DEBUG_VALUE', 0))
-
+# DEBUG = int(os.environ.get('DEBUG_VALUE', 0))
+DEBUG = True
 ALLOWED_HOSTS = ['localhost','127.0.0.1', '182.93.82.39']
 
 AUTH_USER_MODEL = 'steam.User'
@@ -35,7 +36,8 @@ INSTALLED_APPS = [
 
     #Thirdparty
     'crispy_forms',
-    'social_django'
+    'social_django',
+    'debug_toolbar',
     
 ]
 
@@ -47,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
 
 ROOT_URLCONF = 'csgo.urls'
@@ -64,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
@@ -93,11 +97,19 @@ DATABASES = {
         'PORT':os.environ.get('DB_RETAKE_PORT')
     },'warmup':{
                 'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_ARENA_NAME'),  
-        'USER':os.environ.get('DB_ARENA_USER'),  
-        'PASSWORD':os.environ.get('DB_ARENA_PASS'),  
-        'HOST':os.environ.get('DB_ARENA_HOST'),  
-        'PORT':os.environ.get('DB_ARENA_PORT')
+        'NAME': os.environ.get('DB_WARMUP_NAME'),  
+        'USER':os.environ.get('DB_WARMUP_USER'),  
+        'PASSWORD':os.environ.get('DB_WARMUP_PASS'),  
+        'HOST':os.environ.get('DB_WARMUP_HOST'),  
+        'PORT':os.environ.get('DB_WARMUP_PORT')
+    },'pug':{
+                'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DB_PUG_NAME'),  
+        'USER':os.environ.get('DB_PUG_USER'),  
+        'PASSWORD':os.environ.get('DB_PUG_PASS'),  
+        'HOST':os.environ.get('DB_PUG_HOST'),  
+        'PORT':os.environ.get('DB_PUG_PORT')
+
     }}
 
 
@@ -122,8 +134,11 @@ TIME_ZONE = 'UTC'
 
 USE_TZ = True
 
-STATIC_ROOT = '/home/app/gaster/static'
+# STATIC_ROOT = '/home/app/gaster/static'
 STATIC_URL = '/static/'
+
+MEDIA_URL = '/uploads/'
+MEDIA_ROOT = os.path.join(BASE_DIR,'uploads')
 
 LOGIN_REDIRECT_URL = 'stats:index'
 
@@ -150,6 +165,13 @@ KHALTI_API_PUBLIC_KEY_TEST = os.environ.get('KHALTI_API_PUBLIC_KEY_TEST')
 KHALTI_API_SECRET_KEY_TEST = os.environ.get('KHALTI_API_SECRET_KEY_TEST')
 
 KHALTI_VERIFICATION_URL = 'https://khalti.com/api/v2/payment/verify/'
-KHALTI_LIST_URL = 'https://khalti.com/api/v2/merchant-transaction/'
-KHALTI_DETAIL_URL = 'https://khalti.com/api/v2/merchant-transaction/<idx>/'
-KHALTI_STATUS_URL = 'https://khalti.com/api/v2/payment/status/'
+
+REPORT_DISCORD_WEBHOOK_URL = os.environ.get('REPORT_DISCORD_WEBHOOK_URL')
+APPEAL_DISCORD_WEBHOOK_URL = os.environ.get('APPEAL_DISCORD_WEBHOOK_URL')
+CONTACT_DISCORD_WEBHOOK_URL = os.environ.get('CONTACT_DISCORD_WEBHOOK_URL')
+
+# For DDT
+INTERNAL_IPS = [
+    "182.93.82.39",
+    "127.0.0.1",
+]

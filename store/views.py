@@ -1,43 +1,42 @@
-from django.http.response import HttpResponse, JsonResponse
-from django.views.generic import View, ListView, DetailView
-from django.views.generic.base import TemplateView
-from stats.models import Server
-
-from stats.resolver import get_playerinfo
-from .models import Product, Purchase
 from django.conf import settings
-from stats.models import Vip
-import requests
-import datetime
+from django.shortcuts import get_object_or_404, redirect
+from django.http.response import HttpResponse
+from django.views.generic import View, ListView, DetailView
+from django.contrib import messages
+
+from stats.models import Server
+from stats.resolver import get_playerinfo
+
+from .models import Product
+from .logic import premium,khalti
 
 class PremiumStore(ListView):
     template_name = 'store/premium_store.html'
     queryset = Server.objects.filter(selling_premium=True)
     context_object_name = 'servers'
-
-class ProductView(TemplateView):
-    template_name = 'store/product.html'
-
-    def post(self,request,*args, **kwargs):
-        data = get_playerinfo(request.POST.get('steamid'))
-        return JsonResponse(data)
-
-    def get_context_data(self, **kwargs):
-        server_name = self.kwargs.get('slug')
-        context = super().get_context_data(**kwargs)
-        context["products"] = Product.objects.filter(server__slug=server_name)
-        return context
-
     
+    def post(self,request,*args, **kwargs):
+        steamid = get_playerinfo(request.POST.get('steamid'))
+        if not steamid:
+            messages.add_message(request,messages.ERROR,'Error Fetching SteamID',extra_tags='Failure')
+            return redirect('store:index')
+        product = request.POST.get('product','error')
+        return redirect('store:checkout',slug=product,steamid=steamid.get('steamid','error'))    
 
 class CheckoutView(DetailView):
     template_name = 'store/checkout.html'
     model = Product
     context_object_name = 'product'
+    
+    def dispatch(self, request, *args, **kwargs):
+        obj = get_object_or_404(self.model,slug=kwargs.get('slug'))
+        if not obj.in_stock():
+            return redirect('store:index')
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        steamid = self.request.GET.get('steamid')
+        steamid = self.kwargs.get('steamid')
         context['profile'] = get_playerinfo(steamid)
         return context
     
@@ -48,19 +47,15 @@ class KhaltiVerifyView(View):
 
     def post(self,request,*args, **kwargs):
         data = request.POST
-        token = data.get('token')
-        amount = data.get('amount')
-        profile = data.get('merchant_extra')
-        headers = {"Authorization": f"Key {self.key}"}
-        payload = {"token": token,"amount": amount}
-        response = requests.post(self.url, payload, headers = headers)
-        response = response.json()
-        if response.get('idx',None):
-            prdt = Product.objects.get(slug=response.get('product_identity'))
-            Purchase.objects.create(idx=response.get('idx'),product=prdt,mobile=data.get('mobile',None),token=token)
-            expires_date = datetime.timedelta(days=prdt.duration) + datetime.date.today()
-            obj,created = Vip.objects.get_or_create(profile_url=profile,server=prdt.server,defaults={'expires':expires_date})
-            if not created:
-                obj.expires = obj.expires + datetime.timedelta(days=prdt.duration)
-                obj.save()
-        return HttpResponse(response)
+        payload = {"token": data.get('token'),"amount": data.get('amount')}
+        response = khalti.verify_khalti(payload)
+        if not response.get('success'):                                     # If the provided token is invalid return HTTP 400
+            return HttpResponse(status=400)
+
+        profile = get_playerinfo(data.get('merchant_extra'))
+        if request.user.is_authenticated:
+            premium.add_vip(response['data'],profile,buyer=self.request.user.get_steamid().uid)
+        else:
+            premium.add_vip(response['data'],profile)
+            
+        return HttpResponse(status=200)

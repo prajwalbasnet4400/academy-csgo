@@ -1,45 +1,44 @@
-from django.db import models
-from django.utils.text import slugify
-from steam.models import Profile
-from . import resolver
-from . import vip
 import datetime
+from django.db import models
+
+from django.utils.text import slugify
 
 class Server(models.Model):
+    display_name = models.CharField(max_length=128,blank=False)
+    identifier = models.CharField(max_length=128,unique=True,null=True,blank=False)
+    db_identifier = models.CharField(max_length=128,unique=True,null=True,blank=False)
     ip = models.CharField(max_length=32)
     port = models.CharField(max_length=32)
     hide = models.BooleanField(default=False)
-    display_name = models.CharField(unique=True,max_length=128)
-    ssh_ip = models.CharField(max_length=128,null=True,blank=True)
-    ssh_port = models.IntegerField(null=True,blank=True)
-    ssh_user = models.CharField(max_length=64,null=True,blank=True)
-    ssh_psswd = models.CharField(max_length=64,null=True,blank=True)
-    path_to_vip_file = models.CharField(max_length=512,null=True,blank=True)
     selling_premium = models.BooleanField(default=True)
-    slug = models.SlugField(blank=True)
+    slug = models.SlugField(unique=True,null=False,blank=True)
 
     def __str__(self):
         return f'{self.display_name}'
 
     def save(self,*args, **kwargs):
-        self.slug = slugify(self.display_name)
+        self.slug = slugify(self.identifier)
         super().save(*args, **kwargs)
+    
+    def product_in_stock(self):
+        q = Vip.objects.filter(server=self).count()
+        return True if q < 15 else False
 
 
 def get_expiry():
-    return datetime.date.today() + datetime.timedelta(days=31)
+    return datetime.date.today() + datetime.timedelta(days=30)
 
 class Vip(models.Model):
-    profile_url = models.CharField(max_length=256,null=False,blank=False)
     name = models.CharField(max_length=128,blank=True,null=True)
     steamid = models.CharField(max_length=256,blank=True,null=True)
     steamid64 = models.CharField(max_length=128,blank=True,null=True)
     avatar = models.URLField(null=True,blank=True)
     dateofpurchase = models.DateField(default=datetime.date.today)
     expires = models.DateField(default=get_expiry())
-    active = models.BooleanField(default=True)
     server = models.ForeignKey(Server,on_delete=models.CASCADE)
-    discord_id = models.CharField(max_length=32,blank=True,null=True)
+
+    class Meta:
+        ordering = ('expires',)
 
     def __str__(self):
         return self.name
@@ -48,29 +47,7 @@ class Vip(models.Model):
         delta= self.expires - datetime.date.today()
         return delta.days
 
-    def save(self,*args, **kwargs):
-        data = resolver.get_playerinfo(self.profile_url)
-        self.name = data.get('personaname')
-        self.steamid64 = data.get('steamid')
-        self.steamid = resolver.convert_to_steamid(data.get('steamid'))
-        self.avatar = data.get('avatarfull')
 
-        if self.pk:
-            query = Vip.objects.get(pk=self.pk)
-            if query.active == self.active:
-                pass
-            elif self.active == True:
-                print('asudghaiushgdiouashgdiuh')
-                # vip.add_vip(self.steamid,self.server)
-            else:
-                pass
-                # vip.del_vip(self.steamid,self.server)
-                
-        # If new entry add the VIP to the server file
-        else:
-            pass
-            # vip.add_vip(self.steamid)
-        super().save(*args, **kwargs)
 
 class LvlBase(models.Model):
     steam = models.CharField(primary_key=True, max_length=22, db_collation='utf8_unicode_ci')
@@ -91,6 +68,9 @@ class LvlBase(models.Model):
     class Meta:
         managed = False
         db_table = 'lvl_base'
+
+    def __str__(self):
+        return self.name
 
     def get_playtime(self):
         pt = self.playtime // 3600
@@ -124,7 +104,79 @@ class LvlBase(models.Model):
             return int(round((int(hit) / int(shoot)),2)*100)
         except (ValueError, ZeroDivisionError):
             return 0
-    
-    def get_avatar(self):
-        obj, created = Profile.objects.get_or_create(steamid=self.steam)
-        return obj.avatar
+
+class SmAdmins(models.Model):
+    authtype = models.CharField(max_length=5)
+    identity = models.CharField(max_length=65)
+    password = models.CharField(max_length=65, blank=True, null=True)
+    flags = models.CharField(max_length=30)
+    name = models.CharField(max_length=65)
+    immunity = models.PositiveIntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'sm_admins'
+        constraints = [models.UniqueConstraint(fields=['authtype','identity'],name='unqiue_admin')]
+
+
+class SmAdminsGroups(models.Model):
+    admin_id = models.PositiveIntegerField(primary_key=True)
+    group_id = models.PositiveIntegerField()
+    inherit_order = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'sm_admins_groups'
+        unique_together = (('admin_id', 'group_id'),)
+
+
+class SmConfig(models.Model):
+    cfg_key = models.CharField(primary_key=True, max_length=32)
+    cfg_value = models.CharField(max_length=255)
+
+    class Meta:
+        managed = False
+        db_table = 'sm_config'
+
+
+class SmGroupImmunity(models.Model):
+    group_id = models.PositiveIntegerField(primary_key=True)
+    other_id = models.PositiveIntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'sm_group_immunity'
+        unique_together = (('group_id', 'other_id'),)
+
+
+class SmGroupOverrides(models.Model):
+    group_id = models.PositiveIntegerField(primary_key=True)
+    type = models.CharField(max_length=7)
+    name = models.CharField(max_length=32)
+    access = models.CharField(max_length=5)
+
+    class Meta:
+        managed = False
+        db_table = 'sm_group_overrides'
+        unique_together = (('group_id', 'type', 'name'),)
+
+
+class SmGroups(models.Model):
+    flags = models.CharField(max_length=30)
+    name = models.CharField(max_length=120)
+    immunity_level = models.PositiveIntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'sm_groups'
+
+
+class SmOverrides(models.Model):
+    type = models.CharField(primary_key=True, max_length=7)
+    name = models.CharField(max_length=32)
+    flags = models.CharField(max_length=30)
+
+    class Meta:
+        managed = False
+        db_table = 'sm_overrides'
+        unique_together = (('type', 'name'),)

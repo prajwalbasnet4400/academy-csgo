@@ -5,7 +5,6 @@ app_name = 'stats'
 
 urlpatterns = [
     path('',views.Index.as_view(),name='index'),
-    path('test/',views.Test.as_view(),name='test'),
     path('servers/',views.ServerView.as_view(),name='servers'),
     path('premium/',views.VipListView.as_view(),name='premium'),
     path('stats/retake/',views.RetakeView.as_view(),name='retake'),

@@ -2,22 +2,15 @@ from django.http.response import Http404
 from django.views.generic.base import TemplateView
 from django.views.generic import FormView,ListView
 from django.urls import reverse_lazy
+from django.conf import settings
 
-import os
-import dotenv
 from opengsq import CSGO
-import discord_notify as dn
+from .functions import send_message_discord
 
 from .models import LvlBase, Server, Vip
 from steam.models import Profile
-from .forms import ReportPlayerForm,AppealBanForm,ContactForm
-
-
-dotenv.load_dotenv()
-
-
-class Test(TemplateView):
-    template_name = 'test.html'
+from . import resolver
+from . import forms
 
 class Index(TemplateView):
     template_name = 'index.html'
@@ -49,20 +42,27 @@ class ProfileView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         steamid64 = self.kwargs.get('steamid64')
-        try:
-            obj , created = Profile.objects.get_or_create(steamid64=steamid64)
-        except:
-            raise Http404
-        warmup_stat = LvlBase.objects.filter(steam=obj.get_steamid()).using('warmup').first()
-        retake_stat = LvlBase.objects.filter(steam=obj.get_steamid()).using('retake').first()
-        context['profile'] = obj
+
+        profile = Profile.objects.filter(steamid64=steamid64)
+        if not profile.exists():
+            player = resolver.get_playerinfo_s64(steamid64)
+            if player:
+                profile = Profile.objects.create(steamid64=player.get('steamid'),
+                                        avatar=player.get('avatarfull'),nickname=player.get('personaname'))
+            else:
+                raise Http404
+        else:
+            profile = profile.first()
+        warmup_stat = LvlBase.objects.filter(steam=profile.get_steamid()).using('warmup').first()
+        retake_stat = LvlBase.objects.filter(steam=profile.get_steamid()).using('retake').first()
+        context['profile'] = profile
         context['warmup'] = warmup_stat
         context['retake'] = retake_stat
         return context
 
 class VipListView(ListView):
     template_name = 'stats/vip_list.html'
-    queryset = Vip.objects.filter(active=True).select_related('server')
+    queryset = Vip.objects.all().select_related('server')
 
 class RetakeView(ListView):
     template_name = 'stats/stats.html'
@@ -76,15 +76,14 @@ class WarmupView(ListView):
 
 class ReportView(FormView):
     template_name = 'stats/reportform.html'
-    form_class = ReportPlayerForm
-    hook_url = os.environ.get('HOOK_URL')
+    form_class = forms.ReportPlayerForm
+    hook_url = settings.REPORT_DISCORD_WEBHOOK_URL
     success_url  = reverse_lazy('stats:report')
     extra_context = {'reporttitle':'REPORT PLAYER'}
 
     
     def form_valid(self, form):
         resp = super().form_valid(form)
-        notifier = dn.Notifier(self.hook_url)
         data = form.cleaned_data
         msg = f"""
 --------------------------------------------------
@@ -98,20 +97,19 @@ class ReportView(FormView):
 **STATEMENT:** {data['comment']}
 --------------------------------------------------
 """
-        notifier.send(msg,print_message=False)
+        send_message_discord(self.hook_url,msg)
         return resp
 
 class AppealView(FormView):
     template_name = 'stats/reportform.html'
-    form_class = AppealBanForm
-    hook_url = os.environ.get('HOOK_URL')
+    form_class = forms.AppealBanForm
+    hook_url = settings.APPEAL_DISCORD_WEBHOOK_URL
     success_url  = reverse_lazy('stats:appeal')
     extra_context = {'reporttitle':'APPEAL BAN'}
 
 
     def form_valid(self, form):
         resp = super().form_valid(form)
-        notifier = dn.Notifier(self.hook_url)
         data = form.cleaned_data
         msg = f"""
 --------------------------------------------------
@@ -125,19 +123,18 @@ class AppealView(FormView):
 **COMMENT:** {data['comment']}
 --------------------------------------------------
 """
-        notifier.send(msg,print_message=False)
+        send_message_discord(self.hook_url,msg)
         return resp
 
 class ContactView(FormView):
     template_name = 'stats/reportform.html'
-    form_class = ContactForm
-    hook_url = os.environ.get('HOOK_URL')
+    form_class = forms.ContactForm
+    hook_url = settings.CONTACT_DISCORD_WEBHOOK_URL
     success_url  = reverse_lazy('stats:contact')
     extra_context = {'reporttitle':'CONTACT US'}
 
     def form_valid(self, form):
         resp = super().form_valid(form)
-        notifier = dn.Notifier(self.hook_url)
         data = form.cleaned_data
         msg = f"""
 --------------------------------------------------
@@ -150,5 +147,5 @@ class ContactView(FormView):
 **MESSAGE:** {data['message']}
 --------------------------------------------------
 """
-        notifier.send(msg,print_message=False)
+        send_message_discord(self.hook_url,msg)
         return resp

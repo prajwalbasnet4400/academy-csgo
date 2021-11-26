@@ -1,13 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset='utf-8'>
-	<meta http-equiv='X-UA-Compatible' content='IE=edge'>
-	<title>Page Title</title>
-	<meta name='viewport' content='width=device-width, initial-scale=1'>
-</head>
-<body>
-	
+{% extends 'base.html' %}
+{% block content %}
 
 <style>
 #notfound {
@@ -118,16 +110,14 @@
 
 
 </style>
-	<div id="notfound">
+	<div id="notfound" style="color: white;">
 		<div class="notfound">
 			<div class="notfound-404">
 				<div></div>
 				<h1>404</h1>
 			</div>
 			<h2>Page not found</h2>
-			<p>The page you are looking for might have been removed had its name changed or is temporarily unavailable.</p>
-			<a href="{% url 'server:dashboard' %}">home page</a>
+			<p style="color: white;">The page you are looking for might have been removed had its name changed or is temporarily unavailable.</p>
 		</div>
 	</div>
-</body>
-</html>
+  {% endblock content %}
