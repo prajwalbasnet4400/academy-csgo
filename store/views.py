@@ -27,6 +27,7 @@ class CheckoutView(DetailView):
     template_name = 'store/checkout.html'
     model = Product
     context_object_name = 'product'
+    extra_context = {'KHALTI_API_PUBLIC_KEY':settings.KHALTI_API_PUBLIC_KEY}
     
     def dispatch(self, request, *args, **kwargs):
         obj = get_object_or_404(self.model,slug=kwargs.get('slug'))
