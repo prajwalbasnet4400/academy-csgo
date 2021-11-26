@@ -1,5 +1,4 @@
 from pathlib import Path
-from django.core.checks.messages import DEBUG
 import dotenv
 import os
 
@@ -9,10 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = int(os.environ.get('DEBUG_VALUE', 0))
-DEBUG = True
-ALLOWED_HOSTS = ['localhost','127.0.0.1', '182.93.82.39']
+DEBUG = int(os.environ.get('DEBUG_VALUE', 0))
+ALLOWED_HOSTS = ['localhost','127.0.0.1']
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 AUTH_USER_MODEL = 'steam.User'
 AUTHENTICATION_BACKENDS = (
@@ -134,8 +134,8 @@ TIME_ZONE = 'UTC'
 
 USE_TZ = True
 
-# STATIC_ROOT = '/home/app/gaster/static'
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR,'static_root')
 
 MEDIA_URL = '/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'uploads')
