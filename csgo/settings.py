@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     #Thirdparty
     'crispy_forms',
     'social_django',
+    'django_filters',
     'debug_toolbar',
     
 ]
@@ -169,6 +170,15 @@ KHALTI_VERIFICATION_URL = 'https://khalti.com/api/v2/payment/verify/'
 REPORT_DISCORD_WEBHOOK_URL = os.environ.get('REPORT_DISCORD_WEBHOOK_URL')
 APPEAL_DISCORD_WEBHOOK_URL = os.environ.get('APPEAL_DISCORD_WEBHOOK_URL')
 CONTACT_DISCORD_WEBHOOK_URL = os.environ.get('CONTACT_DISCORD_WEBHOOK_URL')
+
+ADMINS = [(os.environ.get('ADMIN_ONE_NAME'),os.environ.get('ADMIN_ONE_EMAIL'),)]
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
+EMAIL_USE_TLS = True
+SERVER_EMAIL = os.environ.get('SERVER_EMAIL')
+
 
 # For DDT
 INTERNAL_IPS = [

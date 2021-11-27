@@ -29,9 +29,9 @@ def get_expiry():
     return datetime.date.today() + datetime.timedelta(days=30)
 
 class Vip(models.Model):
-    name = models.CharField(max_length=128,blank=True,null=True)
-    steamid = models.CharField(max_length=256,blank=True,null=True)
-    steamid64 = models.CharField(max_length=128,blank=True,null=True)
+    name = models.CharField(max_length=128)
+    steamid = models.CharField(max_length=256)
+    steamid64 = models.CharField(max_length=128)
     avatar = models.URLField(null=True,blank=True)
     dateofpurchase = models.DateField(default=datetime.date.today)
     expires = models.DateField(default=get_expiry())

@@ -6,11 +6,13 @@ from django.conf import settings
 
 from opengsq import CSGO
 from .functions import send_message_discord
+from django_filters.views import FilterView
 
 from .models import LvlBase, Server, Vip
 from steam.models import Profile
 from . import resolver
 from . import forms
+from . import filters
 
 class Index(TemplateView):
     template_name = 'index.html'
@@ -64,18 +66,23 @@ class VipListView(ListView):
     template_name = 'stats/vip_list.html'
     queryset = Vip.objects.all().select_related('server')
 
-class RetakeView(ListView):
+
+
+class RetakeView(FilterView):
     template_name = 'stats/stats.html'
-    queryset = LvlBase.objects.using('retake').order_by('-value')[:100]
+    filterset_class = filters.LvlBaseFilter
+    queryset = LvlBase.objects.using('retake').order_by('-value')
     extra_context = {'table_title':'RETAKE STATS'}
 
-class WarmupView(ListView):
+class WarmupView(FilterView):
     template_name = 'stats/stats.html'
-    queryset = LvlBase.objects.using('warmup').order_by('-value')[:100]
+    filterset_class = filters.LvlBaseFilter
+    queryset = LvlBase.objects.using('warmup').order_by('-value')
     extra_context = {'table_title':'WARMUP STATS'}
 
 class ReportView(FormView):
     template_name = 'stats/reportform.html'
+    filterset_class = filters.LvlBaseFilter
     form_class = forms.ReportPlayerForm
     hook_url = settings.REPORT_DISCORD_WEBHOOK_URL
     success_url  = reverse_lazy('stats:report')

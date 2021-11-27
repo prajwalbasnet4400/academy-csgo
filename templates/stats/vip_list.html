@@ -7,18 +7,14 @@
 <div class="container-fluid" style="padding-top:80px;font-family: 'Open Sans';">
     <div class="row">
         {% for vip in vip_list %}
-        <div class="col-6 col-md-3 p-4">
+        <div class="col-12 col-md-4 col-lg-3 p-4">
             <div class="vip-card">
-                <div class="vip-avatar d-flex flex-wrap text-center ">
-
+                <div class="vip-avatar d-flex text-center ">
                     <img style="border-radius: 5px;border: 1px solid #31373f;translate: 0px -25px;" class="ms-1"  src="{{vip.avatar}}" height="64px" width="64px" alt="pp">
-                    <div class="m-auto">
-
                         <h5 class="theme-color text-truncate" style="margin: 0px auto auto auto;padding: 10px;font-weight: bold;">
                             {{vip.name}}
                             <br><span style="font-weight: normal;font-size: 0.9rem;color: #cbcbcb;">{{vip.server}}</span>
                         </h5>
-                    </div>
                 </div>
                 <div class="vip-card-body">
                     Purchased:

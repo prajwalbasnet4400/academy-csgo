@@ -1,7 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&family=Roboto&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
-@import url('http://fonts.cdnfonts.com/css/gilroy-bold');
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+@font-face {
+  font-family:"Gilroy-Bold";
+  src: url("Gilroy-Bold.ttf") format("truetype");
+}
+
+
+
 :root{
   --icon-color : #ffffff;
   --icon-active-color : #c9ab02e5;
@@ -211,8 +218,9 @@ body{
 .custom-form input:focus-within{
   background-color: #31373f60;
   color: #cbcbcb;
-  border: #3d434a 1px solid;
+  border: none;
   box-shadow: none;
+  outline: none;
 }
 .custom-form textarea{
   background-color: #31373f60;
