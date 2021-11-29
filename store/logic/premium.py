@@ -1,5 +1,5 @@
 import datetime
-from stats.models import Vip, SmAdmins
+from stats.models import Vip
 from store.models import Product, Purchase
 from stats.functions import get_steamid
 
@@ -14,7 +14,6 @@ def add_vip(response,profile,**kwargs):
     avatar = profile.get('avatarfull')
     expires_date = datetime.timedelta(days=product.duration) + datetime.date.today()
 
-    SmAdmins.objects.using(product.server.db_identifier).get_or_create(authtype='steam',identity=steamid,flags='ao',name=name,immunity=0)
     Purchase.objects.create(idx=response.get('idx'),product=product,receiver=steamid,**kwargs)
     obj,created = Vip.objects.get_or_create(steamid=steamid,server=product.server,defaults={'expires':expires_date,'name':name,'steamid64':steamid64,'avatar':avatar})
 

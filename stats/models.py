@@ -3,6 +3,8 @@ from django.db import models
 
 from django.utils.text import slugify
 
+from steam.models import Profile
+
 class Server(models.Model):
     display_name = models.CharField(max_length=128,blank=False)
     identifier = models.CharField(max_length=128,unique=True,null=True,blank=False)
@@ -42,6 +44,33 @@ class Vip(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self,*args, **kwargs):
+        super().save(*args,**kwargs)
+        profile = Profile.objects.filter(steamid64=self.steamid64)
+        flag = 'ao'
+        if profile.exists():
+            if profile.first().is_staff:
+                flag = 'abcdego'
+
+        obj , created = SmAdmins.objects.using(self.server.db_identifier).get_or_create(authtype='steam',identity=self.steamid,name=self.name,immunity=0,defaults={'flags':flag})
+        if not created:
+            obj.flags = flag
+            obj.save()
+            
+    def delete(self,*args, **kwargs):
+        q = SmAdmins.objects.using(self.server.db_identifier).get(authtype='steam',identity=self.steamid)
+        profile = Profile.objects.filter(steamid64=self.steamid64)
+        if profile.exists():
+            if profile.first().is_staff:
+                flag = 'bcdego'
+                q.flags = flag
+                q.save()
+            else:
+                q.delete()
+
+        super().delete(*args, **kwargs)
+
 
     def to_expire(self):
         delta= self.expires - datetime.date.today()

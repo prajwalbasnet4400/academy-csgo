@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from stats.models import Vip
 from django.urls import reverse
 
 class User(AbstractUser):
@@ -31,3 +30,5 @@ class Profile(models.Model):
 
     def is_premium(self):
         return Vip.objects.filter(steamid64=self.steamid64).exists()
+
+from stats.models import Vip
