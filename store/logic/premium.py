@@ -6,7 +6,7 @@ from stats.functions import get_steamid
 
 def add_vip(response,profile,**kwargs):
     product_pk = response.get('product_identity')
-    product = Product.objects.get(pk=product_pk)
+    product = Product.objects.get(slug=product_pk)
 
     steamid = get_steamid(profile.get('steamid'))
     steamid64 = profile.get('steamid')
