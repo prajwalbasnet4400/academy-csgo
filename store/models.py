@@ -5,7 +5,7 @@ from stats.models import Server
 
 class Product(models.Model):
     title = models.CharField(max_length=64)
-    price = models.PositiveSmallIntegerField(help_text='Enter in paisa. ie Rs 10 is 1000')
+    price = models.PositiveIntegerField(help_text='Enter in paisa. ie Rs 10 is 1000')
     server = models.ForeignKey(Server,on_delete=models.CASCADE,null=True,related_name='products')
     duration = models.PositiveSmallIntegerField()
     slug = models.SlugField(unique=True,blank=True)
