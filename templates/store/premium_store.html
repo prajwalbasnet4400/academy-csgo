@@ -24,18 +24,16 @@
                 class="fas fa-check theme-color me-1"></i> Server moderation</li>
           </ul>
           <div class="d-flex justify-content-evenly my-3">
-            {% if server.product_in_stock %}
             {% for product in server.products.all %}
             <button type="button" class="btn theme-btn" data-bs-toggle="modal" data-bs-target="#productModal"
               data-bs-product="Premium - {{product.title}} Server ({{product.duration}} days)"
               data-bs-url="{{product.slug}}"><i class="fas fa-cart-plus"></i> {{product.duration}} days</button>
-            {% endfor %}
-            {% else %}
-            <button type="button" class="btn theme-btn"><i class="fas fa-cart-plus"></i> out of stock</button>
-
-
+              {% endfor %}
+              
+            </div>
+            {% if not server.product_in_stock %}
+              Out of stock // Renew available
             {% endif %}
-          </div>
         </div>
       </div>
       {% endfor %}

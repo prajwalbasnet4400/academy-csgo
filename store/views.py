@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.http.response import HttpResponse
 from django.views.generic import View, ListView, DetailView
 from django.contrib import messages
+from stats.models import Vip
 
 from stats.models import Server
 from stats.resolver import get_playerinfo
@@ -31,8 +32,12 @@ class CheckoutView(DetailView):
     
     def dispatch(self, request, *args, **kwargs):
         obj = get_object_or_404(self.model,slug=kwargs.get('slug'))
+        steamid64 = kwargs.get('steamid')
         if not obj.in_stock():
-            return redirect('store:index')
+            vip = Vip.objects.filter(steamid64=steamid64)
+            if not vip.exists():
+                messages.add_message(self.request,messages.INFO,'Product Out Of Stock','Failure')
+                return redirect('store:index')
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -47,8 +52,16 @@ class KhaltiVerifyView(View):
 
     def post(self,request,*args, **kwargs):
         data = request.POST
+        product_pk = data.get('product_identity')
+        product = Product.objects.get(slug=product_pk)
+        
+        if not product.in_stock():
+            return HttpResponse(status=400)
+
         payload = {"token": data.get('token'),"amount": data.get('amount')}
         response = khalti.verify_khalti(payload)
+
+
         if not response.get('success'):                                     # If the provided token is invalid return HTTP 400
             return HttpResponse(status=400)
 
