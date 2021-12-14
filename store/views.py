@@ -34,7 +34,7 @@ class CheckoutView(DetailView):
         obj = get_object_or_404(self.model,slug=kwargs.get('slug'))
         steamid64 = kwargs.get('steamid')
         if not obj.in_stock():
-            vip = Vip.objects.filter(steamid64=steamid64)
+            vip = Vip.objects.filter(steamid64=steamid64,server=obj.server)
             if not vip.exists():
                 messages.add_message(self.request,messages.INFO,'Product Out Of Stock','Failure')
                 return redirect('store:index')
