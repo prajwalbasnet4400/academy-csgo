@@ -22,7 +22,6 @@ class Profile(models.Model):
     def get_absolute_url(self):
         return reverse("stats:profile", kwargs={"steamid64": self.steamid64})
     
-    
     def get_steamid(self):
         y = int(self.steamid64) - 76561197960265728
         x = y % 2 

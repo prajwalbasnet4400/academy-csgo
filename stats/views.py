@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.conf import settings
 
 from opengsq import CSGO
-from .functions import send_message_discord
+from .discord import send_message_discord
 from django_filters.views import FilterView
 
 from .models import LvlBase, Server, Vip

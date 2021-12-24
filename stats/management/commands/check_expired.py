@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 import datetime
-from stats.models import Vip,SmAdmins
+from stats.models import Vip
 
 def notify(days):
     return datetime.date.today() + datetime.timedelta(days=days)

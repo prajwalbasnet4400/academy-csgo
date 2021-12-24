@@ -58,8 +58,7 @@ class KhaltiVerifyView(View):
         if not product.in_stock():
             return HttpResponse(status=400)
 
-        payload = {"token": data.get('token'),"amount": data.get('amount')}
-        response = khalti.verify_khalti(payload)
+        response = khalti.verify_khalti(token=data.get('token'),amount=data.get('amount'))
 
 
         if not response.get('success'):                                     # If the provided token is invalid return HTTP 400

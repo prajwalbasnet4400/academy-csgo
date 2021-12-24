@@ -1,21 +1,14 @@
 import datetime
 from stats.models import Vip
 from store.models import Product, Purchase
-from stats.functions import get_steamid
 
-
-def add_vip(response,profile,**kwargs):
-    product_pk = response.get('product_identity')
-    product = Product.objects.get(slug=product_pk)
-
-    steamid = get_steamid(profile.get('steamid'))
-    steamid64 = profile.get('steamid')
-    name = profile.get('personaname')
-    avatar = profile.get('avatarfull')
+def add_vip(product_slug,khalti_idx,steamid,steamid64,name,avatar,**kwargs):
+    product = Product.objects.get(slug=product_slug)
     expires_date = datetime.timedelta(days=product.duration) + datetime.date.today()
-
-    Purchase.objects.create(idx=response.get('idx'),product=product,receiver=steamid,**kwargs)
-    obj,created = Vip.objects.get_or_create(steamid=steamid,server=product.server,defaults={'expires':expires_date,'name':name,'steamid64':steamid64,'avatar':avatar})
+    Purchase.objects.create(idx=khalti_idx,product=product,receiver=steamid,**kwargs)
+    obj,created = Vip.objects.get_or_create(steamid=steamid,server=product.server,
+                                            defaults={'expires':expires_date,
+                                            'name':name,'steamid64':steamid64,'avatar':avatar})
 
     if not created:
         obj.expires = obj.expires + datetime.timedelta(days=product.duration)

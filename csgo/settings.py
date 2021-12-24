@@ -15,6 +15,7 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
 AUTH_USER_MODEL = 'steam.User'
+
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.steam.SteamOpenId',
     'django.contrib.auth.backends.ModelBackend',
@@ -159,7 +160,6 @@ SOCIAL_AUTH_PIPELINE = (
 SOCIAL_AUTH_AUTHENTICATION_BACKENDS = ('social_core.backends.steam.SteamOpenId',)
 
 STEAM_WEB_API_KEY = os.environ.get('STEAM_API_KEY')
-SOCIAL_AUTH_STEAM_EXTRA_DATA = ['player']
 CRISPY_TEMPLATE_PACK = 'bootstrap4' 
 
 KHALTI_API_PUBLIC_KEY = os.environ.get('KHALTI_API_PUBLIC_KEY')
@@ -180,7 +180,7 @@ EMAIL_USE_TLS = True
 SERVER_EMAIL = os.environ.get('SERVER_EMAIL')
 
 
-# For DDT
+# For Django Debug Toolbar
 INTERNAL_IPS = [
     "127.0.0.1",
 ]

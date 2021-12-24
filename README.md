@@ -14,8 +14,9 @@ These are the basic requiremnts you will need. All other dependencies are in req
 - Django 3.2.6
 
 ## Installation
-- Install required dependencies using pip install requirements.txt
-- Create an .env file in root project directory. Check the project settings.py file for env keys to add.
+- Recommended to use a virtual environment. I personally use `virtualenv` 
+- Then install required dependencies using `pip install requirements.txt`
+- Create an `.env` file in root project directory. Check the `.env_saple` file for keys to add.
 - Then run `python manage.py migrate`.
 
 You will need some prior django experience if you wish to successfully customize and host this panel yourself.
