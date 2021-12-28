@@ -54,7 +54,7 @@ class Vip(models.Model):
                 flag = 'abcdego'
 
         obj , created = SmAdmins.objects.using(self.server.db_identifier).get_or_create(authtype='steam',identity=self.steamid,
-                                                name=self.name,immunity=0,defaults={'flags':flag})
+                                                defaults={'flags':flag,'name':self.name,'immunity':0})
         if not created:
             obj.flags = flag
             obj.save()
