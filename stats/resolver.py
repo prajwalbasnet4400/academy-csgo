@@ -6,17 +6,20 @@ STEAM_API_KEY = settings.STEAM_WEB_API_KEY
 
 
 def identify_steamid_type(profile_url:str) -> dict:
+    if len(profile_url) == 17:
+        return {'type':'profiles','data':profile_url}
+
     profile_url = profile_url.strip('/')
     data = profile_url.split('/')
 
     if data[-3] != 'steamcommunity.com':
-        raise ValidationError('Invalid profile url')
+        raise ValidationError(f'Invalid profile url:{profile_url}')
     if data[-2] == 'id':
         return {'type':'id','data':data[-1]}
     elif data[-2] == 'profiles':
         return {'type':'profiles','data':data[-1]}
     else:
-        raise ValidationError('Invalid profile url')
+        raise ValidationError(f'Invalid profile url:{profile_url}')
 
 def resolve_vanity_name(vanity_name:str) -> str:
     vanity_url = f'http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key={STEAM_API_KEY}&vanityurl={vanity_name}'
