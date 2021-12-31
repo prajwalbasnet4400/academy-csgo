@@ -12,6 +12,9 @@ def identify_steamid_type(profile_url:str) -> dict:
     profile_url = profile_url.strip('/')
     data = profile_url.split('/')
 
+    if len(data) <=2:
+        raise ValidationError(f'Invalid profile url:{profile_url}')
+
     if data[-3] != 'steamcommunity.com':
         raise ValidationError(f'Invalid profile url:{profile_url}')
     if data[-2] == 'id':
