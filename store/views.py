@@ -6,7 +6,7 @@ from django.contrib import messages
 from stats.models import Vip
 
 from stats.models import Server
-from stats.resolver import get_playerinfo
+from stats.resolver import get_playerinfo,get_steamid
 
 from .models import Product
 from .logic import premium,khalti
@@ -17,7 +17,11 @@ class PremiumStore(ListView):
     context_object_name = 'servers'
     
     def post(self,request,*args, **kwargs):
-        steamid = get_playerinfo(request.POST.get('steamid'))
+        try:
+            steamid = get_playerinfo(request.POST.get('steamid'))
+        except:
+            messages.add_message(request,messages.ERROR,'Error Fetching SteamID',extra_tags='Failure')
+            return redirect('store:index')
         if not steamid:
             messages.add_message(request,messages.ERROR,'Error Fetching SteamID',extra_tags='Failure')
             return redirect('store:index')
@@ -66,8 +70,10 @@ class KhaltiVerifyView(View):
 
         profile = get_playerinfo(data.get('merchant_extra'))
         if request.user.is_authenticated:
-            premium.add_vip(response['data'],profile,buyer=self.request.user.get_steamid().uid)
+            premium.add_vip(response['data']['product_identity'],response['data']['idx'],
+                            get_steamid(profile['steamid']),profile['steamid'],profile['personaname'],profile['avatarfull'],**{'buyer':request.user})
         else:
-            premium.add_vip(response['data'],profile)
+            premium.add_vip(response['data']['product_identity'],response['data']['idx'],
+                            get_steamid(profile['steamid']),profile['steamid'],profile['personaname'],profile['avatarfull'])
             
         return HttpResponse(status=200)

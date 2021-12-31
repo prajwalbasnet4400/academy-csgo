@@ -41,3 +41,13 @@ def get_playerinfo(profile_url):
     response = request_get(url,timeout=1)
     response = response.json()
     return response['response']['players'][0]
+
+def get_steamid(sid):
+    if len(str(sid)) != 17:
+        return None
+    try:
+        y = int(sid) - 76561197960265728
+    except:
+        return None
+    x = y % 2 
+    return "STEAM_1:{}:{}".format(x, (y - x) // 2)
