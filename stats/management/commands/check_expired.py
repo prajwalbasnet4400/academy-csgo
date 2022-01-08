@@ -10,5 +10,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         queryset = Vip.objects.filter(expires__lte = notify(-1))
+        length = queryset.count()
         for obj in queryset:
             obj.delete()
+        return length

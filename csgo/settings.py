@@ -96,21 +96,30 @@ DATABASES = {
         'USER':os.environ.get('DB_RETAKE_USER'),  
         'PASSWORD':os.environ.get('DB_RETAKE_PASS'),  
         'HOST':os.environ.get('DB_RETAKE_HOST'),  
-        'PORT':os.environ.get('DB_RETAKE_PORT')
+        'PORT':os.environ.get('DB_RETAKE_PORT'),
+        'OPTIONS': {
+            'charset': 'utf8mb4'
+        }
     },'warmup':{
                 'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_WARMUP_NAME'),  
         'USER':os.environ.get('DB_WARMUP_USER'),  
         'PASSWORD':os.environ.get('DB_WARMUP_PASS'),  
         'HOST':os.environ.get('DB_WARMUP_HOST'),  
-        'PORT':os.environ.get('DB_WARMUP_PORT')
+        'PORT':os.environ.get('DB_WARMUP_PORT'),
+        'OPTIONS': {
+            'charset': 'utf8mb4'
+        }
     },'pug':{
                 'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_PUG_NAME'),  
         'USER':os.environ.get('DB_PUG_USER'),  
         'PASSWORD':os.environ.get('DB_PUG_PASS'),  
         'HOST':os.environ.get('DB_PUG_HOST'),  
-        'PORT':os.environ.get('DB_PUG_PORT')
+        'PORT':os.environ.get('DB_PUG_PORT'),
+        'OPTIONS': {
+            'charset': 'utf8mb4'
+        }
 
     }}
 

@@ -69,6 +69,8 @@ class Vip(models.Model):
                 q.save()
             else:
                 q.delete()
+        else:
+            q.delete()
 
         super().delete(*args, **kwargs)
 
