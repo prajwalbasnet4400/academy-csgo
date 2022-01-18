@@ -47,7 +47,11 @@ class ProfileView(TemplateView):
 
         profile = Profile.objects.filter(steamid64=steamid64)
         if not profile.exists():
-            player = resolver.get_playerinfo_s64(steamid64)
+            try:
+                player = resolver.get_playerinfo(steamid64)
+            except:
+                raise Http404
+
             if player:
                 profile = Profile.objects.create(steamid64=player.get('steamid'),
                                         avatar=player.get('avatarfull'),nickname=player.get('personaname'))
