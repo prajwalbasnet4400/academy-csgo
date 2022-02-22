@@ -3,6 +3,7 @@ from django.views.generic.base import TemplateView
 from django.views.generic import FormView,ListView
 from django.urls import reverse_lazy
 from django.conf import settings
+from django.contrib import messages
 
 from opengsq import CSGO
 from .discord import send_message_discord
@@ -50,12 +51,14 @@ class ProfileView(TemplateView):
             try:
                 player = resolver.get_playerinfo(steamid64)
             except:
+                messages.warning(self.request,'Error, Profile Not Found','alert')
                 raise Http404
 
             if player:
                 profile = Profile.objects.create(steamid64=player.get('steamid'),
                                         avatar=player.get('avatarfull'),nickname=player.get('personaname'))
             else:
+                messages.warning(self.request,'Error, Profile Not Found','alert')
                 raise Http404
         else:
             profile = profile.first()

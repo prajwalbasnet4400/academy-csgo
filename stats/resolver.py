@@ -6,7 +6,7 @@ STEAM_API_KEY = settings.STEAM_WEB_API_KEY
 
 
 def identify_steamid_type(profile_url:str) -> dict:
-    if len(profile_url) == 17:
+    if len(str(profile_url)) == 17:
         return {'type':'profiles','data':profile_url}
 
     profile_url = profile_url.strip('/')

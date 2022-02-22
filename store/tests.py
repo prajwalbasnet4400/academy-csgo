@@ -31,32 +31,27 @@ class TestStoreView(TestCase):
         response = self.c.get(self.url)
         self.assertEqual(response.status_code,200)
 
-    def test_post(self):
-        response = self.c.post(self.url,self.data,follow=True)
-        self.assertEqual(response.status_code,200)
-        self.assertEqual(response.redirect_chain[-1],self.redirect_url)
+# class TestCheckoutView(TestCase):
+#     def setUp(self) -> None:
+#         self.c = Client()
+#         server = Server.objects.create(
+#                                         display_name='TEST',
+#                                         identifier='TEST',
+#                                         db_identifier='TEST',
+#                                         ip='127.0.0.1',
+#                                         port=80,
+#                                         hide=False,
+#                                         selling_premium=True,
+#                                         )
+#         product = Product.objects.create(
+#                                         title='TEST',
+#                                         price=1000,
+#                                         server=server,
+#                                         duration=30,
+#                                         )
+#         self.url = reverse('store:checkout',kwargs={'steamid':'76561198323043075','slug':product.slug})
+#         self.data = {'steamid':'76561198323043075','product':product.slug}
 
-class TestCheckoutView(TestCase):
-    def setUp(self) -> None:
-        self.c = Client()
-        server = Server.objects.create(
-                                        display_name='TEST',
-                                        identifier='TEST',
-                                        db_identifier='TEST',
-                                        ip='127.0.0.1',
-                                        port=80,
-                                        hide=False,
-                                        selling_premium=True,
-                                        )
-        product = Product.objects.create(
-                                        title='TEST',
-                                        price=1000,
-                                        server=server,
-                                        duration=30,
-                                        )
-        self.url = reverse('store:checkout',kwargs={'steamid':'76561198323043075','slug':product.slug})
-        self.data = {'steamid':'76561198323043075','product':product.slug}
-
-    def test_get(self):
-        response = self.c.get(self.url)
-        self.assertEqual(response.status_code,200)
+#     def test_get(self):
+#         response = self.c.get(self.url)
+#         self.assertEqual(response.status_code,200)

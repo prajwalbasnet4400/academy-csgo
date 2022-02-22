@@ -13,4 +13,4 @@ class Command(BaseCommand):
         length = queryset.count()
         for obj in queryset:
             obj.delete()
-        return length
+        return f"{length} VIPs deleted"
