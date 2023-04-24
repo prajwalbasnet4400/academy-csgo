@@ -1,31 +1,75 @@
 import datetime
 from django.db import models
-
+import urllib.parse
 from django.utils.text import slugify
 
 from steam.models import Profile
+from django.db import connections
+import dj_database_url
+from stats.helpers import encrypt, decrypt
 
 class Server(models.Model):
-    display_name = models.CharField(max_length=128,blank=False)
-    identifier = models.CharField(max_length=128,unique=True,null=True,blank=False)
+    display_name = models.CharField(max_length=128,unique=True,blank=False)
+    icon = models.CharField(max_length=32,default="fas fa-skull-crossbones")
     db_identifier = models.CharField(max_length=128,unique=True,null=True,blank=False)
-    ip = models.CharField(max_length=32)
-    port = models.CharField(max_length=32)
+    server_hostname = models.CharField(max_length=512,help_text="can either be hostname or ip:port")
     hide = models.BooleanField(default=False)
     selling_premium = models.BooleanField(default=True)
-    slug = models.SlugField(unique=True,null=False,blank=True)
+
+    # Statistic database config
+    stats_db_url = models.CharField(max_length=1024, blank=True,help_text=" 'mysql://USER:PASSWORD@HOST:PORT/NAME' , this will be encypted")
 
     def __str__(self):
         return f'{self.display_name}'
+    
+    @property
+    def ip(self):
+        try:
+            return self.server_hostname.split(":")[0]
+        except:
+            return self.server_hostname
+
+    @property
+    def port(self):
+        try:
+            return int(self.server_hostname.split(":")[-1])
+        except:
+            return 80
 
     def save(self,*args, **kwargs):
-        self.slug = slugify(self.identifier)
+        url = self.parse_raw_db_url(self.stats_db_url)
+        self.stats_db_url = url
         super().save(*args, **kwargs)
-    
+        self.add_db_to_conn_pool()
+
     def product_in_stock(self):
         q = Vip.objects.filter(server=self).count()
         return True if q < 15 else False
 
+    def get_db_config(self):
+        stats_db_url = decrypt(self.stats_db_url)
+        db = dj_database_url.parse(stats_db_url,conn_max_age=600)
+        db['OPTIONS'] = {'charset': 'utf8mb4'} 
+        return db
+
+    def add_db_to_conn_pool(self):
+        if self.stats_db_url:
+            connections.databases[self.display_name]= self.get_db_config()
+
+    @classmethod
+    def normalize_db_url(self, url):
+        return urllib.parse.quote(url,safe='/,:,@')
+
+    @classmethod
+    def parse_raw_db_url(cls, url):
+        if url:
+            try:
+                normalized_url = cls.normalize_db_url(url)
+                dj_database_url.parse(normalized_url)
+                url = encrypt(normalized_url)
+            except Exception as e:
+                print("Unchanged")
+            return url
 
 def get_expiry():
     return datetime.date.today() + datetime.timedelta(days=30)
@@ -107,15 +151,6 @@ class LvlBase(models.Model):
     def get_playtime(self):
         pt = self.playtime // 3600
         return pt
-    
-    def get_rank(self):
-        return LvlBase.objects.using('retake').values('value').filter(value__gte=self.value).count()
-    
-    def get_rank_retake(self):
-        return LvlBase.objects.using('retake').values('value').filter(value__gte=self.value).count()
-    
-    def get_rank_warmup(self):
-        return LvlBase.objects.using('warmup').values('value').filter(value__gte=self.value).count()
     
     def get_steamid64(self):
         x , y , z = self.steam.split(':')

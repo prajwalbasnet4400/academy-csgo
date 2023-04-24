@@ -1,2 +1,6 @@
 # Optimize query on
 - 'store:indxed'
+
+# TODO
+- stripe payments for premium purchases
+- khalti api upgrade

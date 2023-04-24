@@ -32,40 +32,41 @@
     <div class="table-responsive mt-1 mb-4 my-5">
       <table class="table score-data">
         <tbody>
+          {% for k, v in stats.items %}
           <tr>
             <td>
-              <h5>RETAKE</h5>
+              <h5>{{k|capfirst}}</h5>
               <h6>Server</h6>
             </td>
             <td>
-              <h5>{{retake.get_rank_retake|default:'-'}}</h5>
+              <h5>{{v.rank|default:'-'}}</h5>
               <h6>Place</h6>
             </td>
             <td>
-              <h5>{{retake.value|default:'-'}}</h5>
+              <h5>{{v.obj.value|default:'-'}}</h5>
               <h6>Score</h6>
 
             </td>
             <td>
-              <h5>{{retake.kills|default:'-'}}</h5>
+              <h5>{{v.obj.kills|default:'-'}}</h5>
               <h6>Kills</h6>
             </td>
             <td>
-              <h5>{{retake.deaths|default:'-'}}</h5>
+              <h5>{{v.obj.deaths|default:'-'}}</h5>
               <h6>Deaths</h6>
             </td>
             <td>
-              <h5>{{retake.get_kd|default:'-'}}</h5>
+              <h5>{{v.obj.get_kd|default:'-'}}</h5>
               <h6>K/D</h6>
             </td>
             <td>
-              <h5>{{retake.headshots|default:'-'}}</h5>
+              <h5>{{v.obj.headshots|default:'-'}}</h5>
               <h6>Headshots</h6>
             </td>
             <td>
               <h5>
-                {% if retake.get_playtime %}
-                  {{retake.get_playtime}}
+                {% if v.obj.get_playtime %}
+                  {{v.obj.get_playtime}}
                   h.
                 {% else %}
                 -
@@ -74,50 +75,7 @@
               <h6>Playtime</h6>
             </td>
           </tr>
-          <tr>
-            <td>
-              <h5>WARMUP</h5>
-              <h6>Server</h6>
-            </td>
-            <td>
-              <h5>{{warmup.get_rank_warmup|default:'-'}}</h5>
-              <h6>Place</h6>
-            </td>
-            <td>
-              <h5>{{warmup.value|default:'-'}}</h5>
-              <h6>Score</h6>
-
-            </td>
-            <td>
-              <h5>{{warmup.kills|default:'-'}}</h5>
-              <h6>Kills</h6>
-            </td>
-            <td>
-              <h5>{{warmup.deaths|default:'-'}}</h5>
-              <h6>Deaths</h6>
-            </td>
-            <td>
-              <h5>{{warmup.get_kd|default:'-'}}</h5>
-              <h6>K/D</h6>
-            </td>
-            <td>
-              <h5>{{warmup.headshots|default:'-'}}</h5>
-              <h6>Headshots</h6>
-            </td>
-            <td>
-              
-              <h5>
-                {% if warmup.get_playtime %}
-                  {{warmup.get_playtime}}
-                  h.
-                {% else %}
-                -
-                {% endif %}
-              </h5>
-              <h6>Playtime</h6>
-            </td>
-          </tr>
-
+          {% endfor %}
         </tbody>
       </table>
       <div class="d-flex flex-row justify-content-center my-5 text-center">

@@ -92,17 +92,16 @@
       <li class="nav-item header">
         STATS
       </li>
-      <li class="nav-item">
-        <a class="nav-link" aria-current="page" href="{% url 'stats:deathmatch' %}">
-          <div class="round-icon"><i class="fas fa-khanda"></i></div>
-          <div class="icon-text">Warmup</div>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" aria-current="page" href="{% url 'stats:retake' %}">
-          <span class="round-icon"><i class="fas fa-bomb"></i></span><span class="icon-text">Retake</span>
-        </a>
-      </li>
+      {% for s in servers_list %}
+        {% if s.stats_db_url %}
+        <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="{% url 'stats:staticstics' s.display_name %}">
+            <div class="round-icon"><i class="{{s.icon}}"></i></div>
+            <div class="icon-text">{{s.display_name | capfirst }}</div>
+          </a>
+        </li>
+        {% endif %}
+      {% endfor %}
       <li class="nav-item header">
         MISC
       </li>

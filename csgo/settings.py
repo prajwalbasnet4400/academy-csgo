@@ -3,10 +3,13 @@ import dotenv
 import os
 
 dotenv.load_dotenv()
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
+FERNET_KEY = os.environ.get('FERNET_KEY').encode()
+
 
 DEBUG = int(os.environ.get('DEBUG_VALUE', 0))
 ALLOWED_HOSTS = ['localhost','127.0.0.1']
@@ -30,16 +33,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    # my apps
-    'steam',
-    'stats.apps.StatsConfig',
-    'store.apps.StoreConfig',
 
     #Thirdparty
     'crispy_forms',
     'social_django',
     'django_filters',
     'debug_toolbar',
+
+    # my apps
+    'steam',
+    'store.apps.StoreConfig',
+    'stats.apps.StatsConfig',
     
 ]
 
@@ -72,6 +76,7 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
+                'stats.context_processors.get_server'
             ],
         },
     },
@@ -80,48 +85,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'csgo.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_DEFAULT_NAME'),  
-        'USER': os.environ.get('DB_DEFAULT_USER'),  
-        'PASSWORD': os.environ.get('DB_DEFAULT_PASS'),  
-        'HOST': os.environ.get('DB_DEFAULT_HOST'),  
-        'PORT': os.environ.get('DB_DEFAULT_PORT'),  
-        'OPTIONS': {
-            'charset': 'utf8mb4'
-        }
-    },'retake':{
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_RETAKE_NAME'),  
-        'USER':os.environ.get('DB_RETAKE_USER'),  
-        'PASSWORD':os.environ.get('DB_RETAKE_PASS'),  
-        'HOST':os.environ.get('DB_RETAKE_HOST'),  
-        'PORT':os.environ.get('DB_RETAKE_PORT'),
-        'OPTIONS': {
-            'charset': 'utf8mb4'
-        }
-    },'warmup':{
-                'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_WARMUP_NAME'),  
-        'USER':os.environ.get('DB_WARMUP_USER'),  
-        'PASSWORD':os.environ.get('DB_WARMUP_PASS'),  
-        'HOST':os.environ.get('DB_WARMUP_HOST'),  
-        'PORT':os.environ.get('DB_WARMUP_PORT'),
-        'OPTIONS': {
-            'charset': 'utf8mb4'
-        }
-    },'pug':{
-                'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_PUG_NAME'),  
-        'USER':os.environ.get('DB_PUG_USER'),  
-        'PASSWORD':os.environ.get('DB_PUG_PASS'),  
-        'HOST':os.environ.get('DB_PUG_HOST'),  
-        'PORT':os.environ.get('DB_PUG_PORT'),
-        'OPTIONS': {
-            'charset': 'utf8mb4'
-        }
+    'default': dj_database_url.parse(os.environ.get("DB_DEFAULT_URL")),
+    }
 
-    }}
+DATABASES["default"]['OPTIONS'] = {"charset":"utf8mb4"}
 
 
 AUTH_PASSWORD_VALIDATORS = [

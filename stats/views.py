@@ -62,30 +62,39 @@ class ProfileView(TemplateView):
                 raise Http404
         else:
             profile = profile.first()
-        warmup_stat = LvlBase.objects.filter(steam=profile.get_steamid()).using('warmup').first()
-        retake_stat = LvlBase.objects.filter(steam=profile.get_steamid()).using('retake').first()
         context['profile'] = profile
-        context['warmup'] = warmup_stat
-        context['retake'] = retake_stat
+
+        servers = Server.objects.all().values('db_identifier','display_name')
+        stats = {}
+        for s in servers:
+            name = s.get('display_name')
+            db_name = s.get('display_name')
+            obj = LvlBase.objects.using(db_name).filter(steam=profile.get_steamid()).first()
+            if obj:
+                rank = LvlBase.objects.using(db_name).values('value').filter(value__gte=obj.value).count()
+            else:
+                rank = "-"
+            stats[name] = {
+                    "obj":obj,
+                    "rank": rank
+                    }
+        context['stats'] = stats
+        print(context)
         return context
 
 class VipListView(ListView):
     template_name = 'stats/vip_list.html'
     queryset = Vip.objects.all().select_related('server')
 
-
-
-class RetakeView(FilterView):
+class ServerStatsView(FilterView):
     template_name = 'stats/stats.html'
     filterset_class = filters.LvlBaseFilter
-    queryset = LvlBase.objects.using('retake').order_by('-value')
-    extra_context = {'table_title':'RETAKE STATS'}
-
-class WarmupView(FilterView):
-    template_name = 'stats/stats.html'
-    filterset_class = filters.LvlBaseFilter
-    queryset = LvlBase.objects.using('warmup').order_by('-value')
     extra_context = {'table_title':'WARMUP STATS'}
+
+    def get_queryset(self,*args,**kwargs):
+        db = self.kwargs.get('db')
+        qs = LvlBase.objects.using(db).order_by('-value')
+        return qs
 
 class ReportView(FormView):
     template_name = 'stats/reportform.html'

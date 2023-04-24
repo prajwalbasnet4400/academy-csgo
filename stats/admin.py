@@ -2,9 +2,9 @@ from django.contrib import admin
 from . import models
 
 class ServerAdmin(admin.ModelAdmin):
-    list_display = ('display_name','slug','selling_premium','hide',)
-    search_fields = ('slug',)
+    list_display = ('display_name','selling_premium','hide',)
     list_filter = ('selling_premium','hide',)
+    exclude = ('slug',)
 
 class VipAdmin(admin.ModelAdmin):
     list_display = ('name','steamid','steamid64','expires','server')

@@ -14,7 +14,7 @@ class Product(models.Model):
         return self.title
 
     def save(self,*args, **kwargs):
-        slug = f"{self.server.slug}-{self.duration}D"
+        slug = f"{self.server.display_name}-{self.duration}D"
         self.slug = slugify(slug)
         super().save(*args, **kwargs)
     
