@@ -3,13 +3,19 @@ from django.shortcuts import get_object_or_404, redirect
 from django.http.response import HttpResponse
 from django.views.generic import View, ListView, DetailView
 from django.contrib import messages
+from django.http import Http404
+from django.urls import reverse
+import stripe
+from django.utils.decorators import method_decorator
 from stats.models import Vip
-
+from store.models import StripePurchase
 from stats.models import Server
 from stats.resolver import get_playerinfo,get_steamid
-
+from django.views.decorators.csrf import csrf_exempt
 from .models import Product
 from .logic import premium,khalti
+
+stripe.api_key = settings.STRIPE_SK
 
 class PremiumStore(ListView):
     template_name = 'store/premium_store.html'
@@ -76,4 +82,84 @@ class KhaltiVerifyView(View):
             premium.add_vip(response['data']['product_identity'],response['data']['idx'],
                             get_steamid(profile['steamid']),profile['steamid'],profile['personaname'],profile['avatarfull'])
             
+        return HttpResponse(status=200)
+class StripeCheckoutView(View):
+    def post(self, *args, **kwargs):
+        product = self.get_object(self.kwargs.get("slug"))
+        steamid = self.kwargs.get("steamid")
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                line_items=[
+                    {
+                        'price_data': {
+                            'currency':'USD',
+                            'product_data':{
+                                'name':product.title,
+                            },
+                            'unit_amount':product.price
+                        },
+                        'quantity': 1,
+                    },
+                ],
+                client_reference_id=steamid,
+                metadata={'slug':product.slug},
+                mode='payment',
+                success_url=settings.SITE_URL + reverse("store:checkout_stripe_done"),
+                cancel_url=settings.SITE_URL + reverse("store:checkout",args=[product.slug,steamid]),
+            )
+        except Exception as e:
+            print(e)
+
+        return redirect(checkout_session.url, code=303)
+
+    def get_object(self, slug):
+        product = Product.objects.filter(slug=slug).first()
+        if not product:
+            print("Product not found {}".format(slug))
+            raise Http404()
+        return product
+
+@method_decorator(csrf_exempt,"dispatch")
+class StripeCheckoutDoneView(View):
+
+    def get(self,*args,**kwargs):
+        messages.success(self.request,"Premium purchase successful","success")
+        return redirect("stats:premium")
+    
+    def post(self,*args,**kwargs):
+        payload = self.request.body
+        sig_header = self.request.META['HTTP_STRIPE_SIGNATURE']
+        event = None
+
+        try:
+            event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WH_SECRET
+            )
+        except ValueError as e:
+            # Invalid payload
+            return HttpResponse(status=400)
+        except stripe.error.SignatureVerificationError as e:
+            # Invalid signature
+            return HttpResponse(status=400)
+
+        id = event['data']['object']['payment_intent']
+        # Check if a duplicate request
+        if StripePurchase.objects.filter(idx=id).exists():
+            return HttpResponse(status=400)
+
+        if event['type'] == 'checkout.session.completed':
+            # Retrieve the session. If you require line items in the response, you may include them by expanding line_items.
+            session = stripe.checkout.Session.retrieve(
+            event['data']['object']['id'],
+            expand=['line_items'],
+            )
+            profile = get_playerinfo(session.client_reference_id)
+            product_slug = session.metadata['slug']
+            if self.request.user.is_authenticated:
+                premium.add_vip(product_slug,id,
+                                get_steamid(profile['steamid']),profile['steamid'],profile['personaname'],profile['avatarfull'],**{'buyer':request.user})
+            else:
+                premium.add_vip(product_slug,id,
+                                get_steamid(profile['steamid']),profile['steamid'],profile['personaname'],profile['avatarfull'])
+
         return HttpResponse(status=200)

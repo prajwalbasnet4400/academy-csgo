@@ -155,6 +155,10 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT')
 EMAIL_USE_TLS = True
 SERVER_EMAIL = os.environ.get('SERVER_EMAIL')
 
+SITE_URL = os.environ.get("SITE_URL","http://127.0.0.1:8000")
+STRIPE_SK=os.environ.get("STRIPE_SK")
+STRIPE_PK=os.environ.get("STRIPE_PK")
+STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET")
 
 # For Django Debug Toolbar
 INTERNAL_IPS = [
