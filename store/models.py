@@ -9,7 +9,7 @@ class Product(models.Model):
             STRIPE = "STRIPE", "STRIPE"
     title = models.CharField(max_length=64)
     price = models.PositiveIntegerField(help_text='Enter in paisa. ie Rs 10 is 1000')
-    server = models.ForeignKey(Server,on_delete=models.CASCADE,null=True,related_name='products')
+    server = models.ForeignKey(Server,on_delete=models.SET_NULL,null=True,related_name='products')
     duration = models.PositiveSmallIntegerField()
     slug = models.SlugField(unique=True,blank=True)
     payment_method = models.CharField(max_length=64,choices=MethodChoices.choices,default=MethodChoices.KHALTI)
@@ -36,7 +36,7 @@ class Purchase(models.Model):
     buyer = models.CharField(max_length=54,null=True)
     receiver = models.CharField(max_length=54,null=True)
     idx = models.CharField(max_length=128)
-    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,on_delete=models.SET_NULL,null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     complete = models.BooleanField(default=False)
 

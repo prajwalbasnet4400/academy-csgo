@@ -81,7 +81,7 @@ class Vip(models.Model):
     avatar = models.URLField(null=True,blank=True)
     dateofpurchase = models.DateField(default=datetime.date.today)
     expires = models.DateField(default=get_expiry)
-    server = models.ForeignKey(Server,on_delete=models.CASCADE)
+    server = models.ForeignKey(Server,on_delete=models.SET_NULL,null=True)
 
     class Meta:
         ordering = ('expires',)
