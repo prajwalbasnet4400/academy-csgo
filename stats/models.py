@@ -97,14 +97,14 @@ class Vip(models.Model):
             if profile.first().is_staff:
                 flag = 'abcdego'
 
-        obj , created = SmAdmins.objects.using(self.server.db_identifier).get_or_create(authtype='steam',identity=self.steamid,
+        obj , created = SmAdmins.objects.using(self.server.display_name).get_or_create(authtype='steam',identity=self.steamid,
                                                 defaults={'flags':flag,'name':self.name,'immunity':0})
         if not created:
             obj.flags = flag
             obj.save()
             
     def delete(self,*args, **kwargs):
-        q = SmAdmins.objects.using(self.server.db_identifier).get(authtype='steam',identity=self.steamid)
+        q = SmAdmins.objects.using(self.server.display_name).get(authtype='steam',identity=self.steamid)
         profile = Profile.objects.filter(steamid64=self.steamid64)
         if profile.exists():
             if profile.first().is_staff:
