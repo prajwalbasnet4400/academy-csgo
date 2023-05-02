@@ -89,13 +89,16 @@ class VipListView(ListView):
 class ServerStatsView(FilterView):
     template_name = 'stats/stats.html'
     filterset_class = filters.LvlBaseFilter
-    extra_context = {'table_title':'WARMUP STATS'}
 
     def get_queryset(self,*args,**kwargs):
         db = self.kwargs.get('db')
         qs = LvlBase.objects.using(db).order_by('-value')
         return qs
 
+    def get_context_data(self,**kwargs):
+        context = super().get_context_data(**kwargs)
+        context['table_title'] = self.kwargs.get('db')
+        return context
 class ReportView(FormView):
     template_name = 'stats/reportform.html'
     filterset_class = filters.LvlBaseFilter
