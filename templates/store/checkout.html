@@ -41,7 +41,7 @@
                     </div>
                     <div class="form-group">
                         <label></label>Price:</label>
-                        <input disabled type="text" value="Rs {{product.f_price}}" class="form-control">
+                        <input disabled type="text" value="{% if product.payment_method == 'STRIPE' %}$ {% else %}Rs {% endif %}{{product.f_price}}" class="form-control">
                     </div>
                 </div>
                 </p>
@@ -68,12 +68,12 @@
                 {% if product.payment_method == "STRIPE" %}
                     <form class="d-flex justify-content-evenly my-3" action="{% url 'store:checkout_stripe' product.slug profile.steamid %}" method="POST">
                         {% csrf_token %}
-                        <button type="submit" class="btn theme-btn" id="checkout-button">Checkout</button>
+                        <button type="submit" class="btn theme-btn" id="checkout-button">Checkout with Stripe</button>
                     </form>
                 {% elif product.payment_method == "KHALTI" %}
-                    <div class="d-flex justify-content-evenly my-3">
-                        <button id="payment-button" class="btn theme-btn"> Checkout </button>
-                    </div>
+                    <form class="d-flex justify-content-evenly my-3" action="{% url 'store:checkout_khalti' product.slug profile.steamid %}" method="GET">
+                        <button type="submit" class="btn theme-btn" id="checkout-button">Checkout with Khalti</button>
+                    </form>
                 {% endif %}
             </div>
         </div>
@@ -81,69 +81,3 @@
 </div>
 {% include 'footer.html' %}
 {% endblock content %}
-
-
-{% block js %}
-<script>
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    var config = {
-        "merchant_extra": "{{profile.steamid}}",
-        "publicKey": "{{KHALTI_API_PUBLIC_KEY}}",
-        "productIdentity": "{{product.slug}}",
-        "productName": "{{product.slug}}",
-        "productUrl": "https://csgo.academygaming.org/{{product.get_absolute_url}}",
-        "paymentPreference": [
-            "KHALTI",
-            "EBANKING",
-            "MOBILE_BANKING",
-            "CONNECT_IPS",
-            "SCT",
-        ],
-        "eventHandler": {
-            onSuccess(payload) {
-                Notiflix.Block.Pulse('body');
-                var url = "{% url 'store:khalti_verification_url' %}";
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: payload,
-                    dataType: 'json',
-                    headers: { 'X-CSRFToken': csrftoken },
-                    statusCode: {
-                        200: function (e) {
-                            Notiflix.Block.Remove('body');
-                            Notiflix.Report.Success(
-                                'Academey Gaming - Premium Purchase',
-                                '<p class="text-center" style="color:#cbcbcb;">Thank you for supporting us. <br>If you have any queries do contact our staff.</p>',
-                                'Close'
-                            )
-                        },
-                        500: function (e) {
-                            Notiflix.Block.Remove('body');
-                            Notiflix.Report.Failure(
-                                'Error Occoured',
-                                '<p class="text-center">Something went wrong on our end. <br>Please contact our staff.</p>',
-                                'Close'
-                            )
-
-                        }
-                    }
-                });
-            },
-            onError(error) {
-                console.log(error);
-            },
-            onClose() {
-                console.log('widget is closing');
-            }
-        }
-    };
-
-    var checkout = new KhaltiCheckout(config);
-    var btn = document.getElementById("payment-button");
-    btn.onclick = function () {
-        checkout.show({ amount: {{product.price}} });
-    }
-</script>
-{% endblock js %}

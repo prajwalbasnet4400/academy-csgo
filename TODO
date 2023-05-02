@@ -1,6 +1,5 @@
 # Optimize query on
-- 'store:indxed'
+- 'store:index'
 
-# TODO
-- stripe payments for premium purchases
-- khalti api upgrade
+- Write unit tests
+- Write integration tests

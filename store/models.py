@@ -58,6 +58,7 @@ class KhaltiPurchase(models.Model):
     buyer = models.CharField(max_length=54,null=True)
     receiver = models.CharField(max_length=54,null=True)
     idx = models.CharField(max_length=128)
+    pidx = models.CharField(max_length=128)
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     complete = models.BooleanField(default=False)

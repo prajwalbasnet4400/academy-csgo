@@ -38,7 +38,6 @@ class CheckoutView(DetailView):
     template_name = 'store/checkout.html'
     model = Product
     context_object_name = 'product'
-    extra_context = {'KHALTI_API_PUBLIC_KEY':settings.KHALTI_API_PUBLIC_KEY}
     
     def dispatch(self, request, *args, **kwargs):
         obj = get_object_or_404(self.model,slug=kwargs.get('slug'))
@@ -58,6 +57,9 @@ class CheckoutView(DetailView):
     
 
 class KhaltiVerifyView(View):
+    """
+        Deprecated
+    """
     url = 'https://khalti.com/api/v2/payment/verify/'
 
     def post(self,request,*args, **kwargs):
@@ -87,29 +89,25 @@ class StripeCheckoutView(View):
     def post(self, *args, **kwargs):
         product = self.get_object(self.kwargs.get("slug"))
         steamid = self.kwargs.get("steamid")
-        try:
-            checkout_session = stripe.checkout.Session.create(
-                line_items=[
-                    {
-                        'price_data': {
-                            'currency':'USD',
-                            'product_data':{
-                                'name':product.title,
-                            },
-                            'unit_amount':product.price
+        checkout_session = stripe.checkout.Session.create(
+            line_items=[
+                {
+                    'price_data': {
+                        'currency':'USD',
+                        'product_data':{
+                            'name':product.title,
                         },
-                        'quantity': 1,
+                        'unit_amount':product.price
                     },
-                ],
-                client_reference_id=steamid,
-                metadata={'slug':product.slug},
-                mode='payment',
-                success_url=settings.SITE_URL + reverse("store:checkout_stripe_done"),
-                cancel_url=settings.SITE_URL + reverse("store:checkout",args=[product.slug,steamid]),
-            )
-        except Exception as e:
-            print(e)
-
+                    'quantity': 1,
+                },
+            ],
+            client_reference_id=steamid,
+            metadata={'slug':product.slug},
+            mode='payment',
+            success_url=settings.SITE_URL + reverse("store:checkout_stripe_done"),
+            cancel_url=settings.SITE_URL + reverse("store:checkout",args=[product.slug,steamid]),
+        )
         return redirect(checkout_session.url, code=303)
 
     def get_object(self, slug):
@@ -157,9 +155,46 @@ class StripeCheckoutDoneView(View):
             product_slug = session.metadata['slug']
             if self.request.user.is_authenticated:
                 premium.add_vip(product_slug,id,
-                                get_steamid(profile['steamid']),profile['steamid'],profile['personaname'],profile['avatarfull'],**{'buyer':request.user})
+                                get_steamid(profile['steamid']),profile['steamid'],profile['personaname'],profile['avatarfull'],**{'buyer':self.request.user})
             else:
                 premium.add_vip(product_slug,id,
                                 get_steamid(profile['steamid']),profile['steamid'],profile['personaname'],profile['avatarfull'])
 
         return HttpResponse(status=200)
+
+class KhaltiCheckoutView(View):
+    def get(self,*args,**kwargs):
+        product_slug = self.kwargs.get("slug")
+        steamid = self.kwargs.get("steamid")
+        product = Product.objects.filter(slug=product_slug).first()
+        pidx, payment_url = khalti.KhaltiV2.initiate_payment(product.price,steamid,product.slug)
+        return redirect(payment_url)
+
+class KhaltiCheckoutDoneView(View):
+
+    def get(self, *args, **kwargs):
+        params = self.request.GET
+        try:
+            pidx = params['pidx']
+            product_slug = params['purchase_order_name']
+            steamid = params['purchase_order_id']
+            tidx = params['transaction_id']
+        except Exception as e:
+            raise e
+
+        resp = khalti.KhaltiV2.verify_payment(pidx)
+        print(resp)
+        if resp.get('success'):
+            profile = get_playerinfo(steamid)
+            if self.request.user.is_authenticated:
+                premium.add_vip(product_slug,tidx,
+                                get_steamid(profile['steamid']),profile['steamid'],profile['personaname'],
+                                profile['avatarfull'],**{'buyer':self.request.user,'pidx':pidx})
+            else:
+                premium.add_vip(product_slug,tidx,
+                                get_steamid(profile['steamid']),profile['steamid'],profile['personaname'],profile['avatarfull'],**{'pidx':pidx})
+            messages.success(self.request,"Premium purchase successful","success")
+            return redirect("stats:premium")
+        else:
+            messages.error(self.request,"Premium purchase failed. Please contact an admin for further info","failure")
+            return redirect("store:index")

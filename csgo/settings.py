@@ -138,8 +138,6 @@ SOCIAL_AUTH_AUTHENTICATION_BACKENDS = ('social_core.backends.steam.SteamOpenId',
 STEAM_WEB_API_KEY = os.environ.get('STEAM_API_KEY')
 CRISPY_TEMPLATE_PACK = 'bootstrap4' 
 
-KHALTI_API_PUBLIC_KEY = os.environ.get('KHALTI_API_PUBLIC_KEY')
-KHALTI_API_SECRET_KEY = os.environ.get('KHALTI_API_SECRET_KEY')
 
 KHALTI_VERIFICATION_URL = 'https://khalti.com/api/v2/payment/verify/'
 
@@ -156,9 +154,11 @@ EMAIL_USE_TLS = True
 SERVER_EMAIL = os.environ.get('SERVER_EMAIL')
 
 SITE_URL = os.environ.get("SITE_URL","http://127.0.0.1:8000")
+
 STRIPE_SK=os.environ.get("STRIPE_SK")
-STRIPE_PK=os.environ.get("STRIPE_PK")
 STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET")
+
+KHALTI_API_SECRET_KEY = os.environ.get('KHALTI_API_SECRET_KEY')
 
 # For Django Debug Toolbar
 INTERNAL_IPS = [
