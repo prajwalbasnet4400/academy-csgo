@@ -64,20 +64,23 @@ class ProfileView(TemplateView):
             profile = profile.first()
         context['profile'] = profile
 
-        servers = Server.objects.all().values('db_identifier','display_name')
+        servers = Server.objects.exclude(stats_db_url__isnull=True).exclude(stats_db_url='')
         stats = {}
         for s in servers:
-            name = s.get('display_name')
-            db_name = s.get('display_name')
-            obj = LvlBase.objects.using(db_name).filter(steam=profile.get_steamid()).first()
-            if obj:
-                rank = LvlBase.objects.using(db_name).values('value').filter(value__gte=obj.value).count()
-            else:
-                rank = "-"
-            stats[name] = {
-                    "obj":obj,
-                    "rank": rank
-                    }
+            name = s.display_name
+            db_name = s.display_name
+            try:
+                obj = LvlBase.objects.using(db_name).filter(steam=profile.get_steamid()).first()
+                if obj:
+                    rank = LvlBase.objects.using(db_name).values('value').filter(value__gte=obj.value).count()
+                else:
+                    rank = "-"
+                stats[name] = {
+                        "obj":obj,
+                        "rank": rank
+                        }
+            except Exception:
+                pass
         context['stats'] = stats
         print(context)
         return context
@@ -90,8 +93,11 @@ class ServerStatsView(FilterView):
     template_name = 'stats/stats.html'
     filterset_class = filters.LvlBaseFilter
 
-    def get_queryset(self,*args,**kwargs):
+    def get_queryset(self):
         db = self.kwargs.get('db')
+        server = Server.objects.filter(display_name=db).first()
+        if not server or not server.has_stats:
+            raise Http404("Stats not available for this server")
         qs = LvlBase.objects.using(db).order_by('-value')
         return qs
 

@@ -1,3 +1,4 @@
+import logging
 from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect
 from django.http.response import HttpResponse
@@ -15,6 +16,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Product
 from .logic import premium,khalti
 
+logger = logging.getLogger(__name__)
+
 stripe.api_key = settings.STRIPE_SK
 
 class PremiumStore(ListView):
@@ -23,14 +26,22 @@ class PremiumStore(ListView):
     context_object_name = 'servers'
     
     def post(self,request,*args, **kwargs):
+        steamid_input = request.POST.get('steamid')
+        logger.info(f"Attempting to fetch player info for: {steamid_input}")
+
         try:
-            steamid = get_playerinfo(request.POST.get('steamid'))
-        except:
+            steamid = get_playerinfo(steamid_input)
+        except Exception as e:
+            logger.error(f"Exception fetching SteamID for input '{steamid_input}': {e}", exc_info=True)
             messages.add_message(request,messages.ERROR,'Error Fetching SteamID',extra_tags='Failure')
             return redirect('store:index')
+
         if not steamid:
+            logger.warning(f"No player data returned for input: {steamid_input}")
             messages.add_message(request,messages.ERROR,'Error Fetching SteamID',extra_tags='Failure')
             return redirect('store:index')
+
+        logger.info(f"Successfully fetched player: {steamid.get('personaname')} ({steamid.get('steamid')})")
         product = request.POST.get('product','error')
         return redirect('store:checkout',slug=product,steamid=steamid.get('steamid','error'))    
 

@@ -11,13 +11,13 @@ from stats.helpers import encrypt, decrypt
 class Server(models.Model):
     display_name = models.CharField(max_length=128,unique=True,blank=False)
     icon = models.CharField(max_length=32,default="fas fa-skull-crossbones")
-    db_identifier = models.CharField(max_length=128,unique=True,null=True,blank=False)
+    db_identifier = models.CharField(max_length=128,unique=True,null=True,blank=True)
     server_hostname = models.CharField(max_length=512,help_text="can either be hostname or ip:port")
     hide = models.BooleanField(default=False)
     selling_premium = models.BooleanField(default=True)
 
-    # Statistic database config
-    stats_db_url = models.CharField(max_length=1024, blank=True,help_text=" 'mysql://USER:PASSWORD@HOST:PORT/NAME' , this will be encypted")
+    # Statistic database config (optional)
+    stats_db_url = models.CharField(max_length=1024, blank=True, null=True, help_text=" 'mysql://USER:PASSWORD@HOST:PORT/NAME' , this will be encypted")
 
     def __str__(self):
         return f'{self.display_name}'
@@ -37,10 +37,15 @@ class Server(models.Model):
             return 80
 
     def save(self,*args, **kwargs):
-        url = self.parse_raw_db_url(self.stats_db_url)
-        self.stats_db_url = url
+        if self.stats_db_url:
+            url = self.parse_raw_db_url(self.stats_db_url)
+            self.stats_db_url = url
         super().save(*args, **kwargs)
         self.add_db_to_conn_pool()
+
+    @property
+    def has_stats(self):
+        return bool(self.stats_db_url)
 
     def product_in_stock(self):
         q = Vip.objects.filter(server=self).count()
@@ -91,30 +96,35 @@ class Vip(models.Model):
 
     def save(self,*args, **kwargs):
         super().save(*args,**kwargs)
-        profile = Profile.objects.filter(steamid64=self.steamid64)
-        flag = 'ao'
-        if profile.exists():
-            if profile.first().is_staff:
-                flag = 'abcdego'
+        if self.server and self.server.has_stats:
+            profile = Profile.objects.filter(steamid64=self.steamid64)
+            flag = 'ao'
+            if profile.exists():
+                if profile.first().is_staff:
+                    flag = 'abcdego'
 
-        obj , created = SmAdmins.objects.using(self.server.display_name).get_or_create(authtype='steam',identity=self.steamid,
-                                                defaults={'flags':flag,'name':self.name,'immunity':0})
-        if not created:
-            obj.flags = flag
-            obj.save()
-            
+            obj , created = SmAdmins.objects.using(self.server.display_name).get_or_create(authtype='steam',identity=self.steamid,
+                                                    defaults={'flags':flag,'name':self.name,'immunity':0})
+            if not created:
+                obj.flags = flag
+                obj.save()
+
     def delete(self,*args, **kwargs):
-        q = SmAdmins.objects.using(self.server.display_name).get(authtype='steam',identity=self.steamid)
-        profile = Profile.objects.filter(steamid64=self.steamid64)
-        if profile.exists():
-            if profile.first().is_staff:
-                flag = 'bcdego'
-                q.flags = flag
-                q.save()
-            else:
-                q.delete()
-        else:
-            q.delete()
+        if self.server and self.server.has_stats:
+            try:
+                q = SmAdmins.objects.using(self.server.display_name).get(authtype='steam',identity=self.steamid)
+                profile = Profile.objects.filter(steamid64=self.steamid64)
+                if profile.exists():
+                    if profile.first().is_staff:
+                        flag = 'bcdego'
+                        q.flags = flag
+                        q.save()
+                    else:
+                        q.delete()
+                else:
+                    q.delete()
+            except SmAdmins.DoesNotExist:
+                pass
 
         super().delete(*args, **kwargs)
 
